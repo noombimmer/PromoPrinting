@@ -111,8 +111,8 @@ public class RestService extends IntentService {
                 //pc.printBitmapZPl(getApplicationContext(),str);
 
                 //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
-                Log.e("Debug","http://127.0.0.1:5000/printing?FILE=" + str + "&ICON=" + icon);
-                response.redirect("http://127.0.0.1:5000/printing?FILE=" + str + "&ICON=" + icon);
+                Log.e("Debug","/printing?FILE=" + str + "&ICON=" + icon);
+                response.redirect("/printing?FILE=" + str + "&ICON=" + icon);
             }
         });
 
@@ -120,18 +120,18 @@ public class RestService extends IntentService {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
                 String str =  request.getQuery().getString("FILE");
-                Log.e("Debug","http://127.0.0.1:5000/file?FILE=" + str );
+                Log.e("Debug","/file?FILE=" + str );
 
                 File fs = new File("/storage/emulated/0/" + str);
                 String mimeType = getMimeType("/storage/emulated/0/" + str);
-                Log.e("Debug11", (("File size:" + fs.length())));
+                Log.e("Debug", (("File size:" + fs.length())));
                 FileInputStream fileStream = null;
                 try {
                     fileStream = new FileInputStream(fs);
                     byte[] bs = new byte[(int) fs.length()];
                     int read = fileStream.read(bs, 0, bs.length);
                     response.send(mimeType,bs);
-                    Log.e("Debug44", (("Send File completed")));
+                    Log.e("Debug", (("Send File completed")));
                 } catch (FileNotFoundException e) {
                     Log.e("Debug FileNotFoundException", e.getMessage());
                 }catch (IOException e) {
@@ -174,8 +174,8 @@ public class RestService extends IntentService {
                 String html_text = "<!DOCTYPE html>\n" +
                         "<html>\n" +
                         "<body>\n" +
-                        "<A HREF=\"http://127.0.0.1:5000/popup_print?FILE="+ str +"&ICON="+str_icon+"\" >\n" +
-                        "<img src=\"http://127.0.0.1:8080/"+str_icon+"\" ></img>\n" +
+                        "<A HREF=\"/popup_print?FILE="+ str +"&ICON="+str_icon+"\" >\n" +
+                        "<img src=\"/file?FILE="+str_icon+"\" ></img>\n" +
                         "<!-- <button onclick=\"myFunction()\">Print this page</button> -->\n" +
                         "</A>\n" +
                         "<script>\n" +
@@ -189,7 +189,7 @@ public class RestService extends IntentService {
                         "</body>\n" +
                         "</html>";
                 Log.e("", "Printing....... ");
-                Log.e("Debug","http://127.0.0.1:5000/popup_print?FILE=" + str + "&ICON=" + str_icon);
+                Log.e("Debug","/popup_print?FILE=" + str + "&ICON=" + str_icon);
                 //response.redirect("http://127.0.0.1:8080/print.html");
                 response.send(html_text);
             }
