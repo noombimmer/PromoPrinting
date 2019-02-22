@@ -362,11 +362,7 @@ final class ResponseHeaders {
             return false;
         }
 
-        if (noStore) {
-            return false;
-        }
-
-        return true;
+        return !noStore;
     }
 
     /**
@@ -469,13 +465,10 @@ final class ResponseHeaders {
          * cached response, we may return the cache's response. Like Chrome (but
          * unlike Firefox), this client prefers to return the newer response.
          */
-        if (lastModified != null
+        return lastModified != null
                 && networkResponse.lastModified != null
-                && networkResponse.lastModified.getTime() < lastModified.getTime()) {
-            return true;
-        }
+                && networkResponse.lastModified.getTime() < lastModified.getTime();
 
-        return false;
     }
 
     /**

@@ -156,7 +156,7 @@ public class Continuation extends SimpleCancellable implements ContinuationCallb
     }
 
     @Override
-    public void onContinue(Continuation continuation, CompletedCallback next) throws Exception {
+    public void onContinue(Continuation continuation, CompletedCallback next) {
         setCallback(next);
         start();
     }

@@ -647,8 +647,8 @@ public class AsyncHttpClient {
         return ret;
     }
 
-    public static interface WebSocketConnectCallback {
-        public void onCompleted(Exception ex, WebSocket webSocket);
+    public interface WebSocketConnectCallback {
+        void onCompleted(Exception ex, WebSocket webSocket);
     }
 
     public Future<WebSocket> websocket(final AsyncHttpRequest req, String protocol, final WebSocketConnectCallback callback) {

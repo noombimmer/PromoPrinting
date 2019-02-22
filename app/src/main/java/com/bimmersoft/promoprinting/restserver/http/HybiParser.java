@@ -40,6 +40,7 @@ import com.bimmersoft.promoprinting.restserver.callback.DataCallback;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.DataFormatException;
@@ -471,19 +472,11 @@ abstract class HybiParser {
     }
 
     private String encode(byte[] buffer) {
-        try {
-            return new String(buffer, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return new String(buffer, StandardCharsets.UTF_8);
     }
 
     private byte[] decode(String string) {
-        try {
-            return (string).getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return (string).getBytes(StandardCharsets.UTF_8);
     }
 
     private int getInteger(byte[] bytes) throws ProtocolError {

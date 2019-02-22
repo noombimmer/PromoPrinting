@@ -36,7 +36,7 @@ interface BitArray {
   void shiftLeft(int count);
 
   /** Bit set that only supports settings bits 0 - 63. */
-  public final class FixedCapacity implements BitArray {
+  final class FixedCapacity implements BitArray {
     long data = 0x0000000000000000L;
 
     @Override
@@ -82,7 +82,7 @@ interface BitArray {
   }
 
   /** Bit set that grows as needed. */
-  public final class VariableCapacity implements BitArray {
+  final class VariableCapacity implements BitArray {
 
     long[] data;
 

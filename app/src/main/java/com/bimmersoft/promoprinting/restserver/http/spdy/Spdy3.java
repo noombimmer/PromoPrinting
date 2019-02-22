@@ -381,8 +381,7 @@ final class Spdy3 implements Variant {
         }
 
         @Override
-        public void pushPromise(int streamId, int promisedStreamId, List<Header> requestHeaders)
-        throws IOException {
+        public void pushPromise(int streamId, int promisedStreamId, List<Header> requestHeaders) {
             // Do nothing: no push promise for SPDY/3.
         }
 
@@ -397,7 +396,7 @@ final class Spdy3 implements Variant {
         throws IOException {
             if (closed) throw new IOException("closed");
             ByteBufferList headerBlockBuffer = writeNameValueBlockToBuffer(headerBlock);
-            int length = (int) (10 + headerBlockBuffer.remaining());
+            int length = (10 + headerBlockBuffer.remaining());
             int type = TYPE_SYN_STREAM;
             int flags = (outFinished ? FLAG_FIN : 0) | (inFinished ? FLAG_UNIDIRECTIONAL : 0);
 
@@ -419,7 +418,7 @@ final class Spdy3 implements Variant {
             ByteBufferList headerBlockBuffer = writeNameValueBlockToBuffer(headerBlock);
             int type = TYPE_SYN_REPLY;
             int flags = (outFinished ? FLAG_FIN : 0);
-            int length = (int) (headerBlockBuffer.remaining() + 4);
+            int length = (headerBlockBuffer.remaining() + 4);
 
             ByteBuffer sink = ByteBufferList.obtain(256).order(ByteOrder.BIG_ENDIAN);
             sink.putInt(0x80000000 | (VERSION & 0x7fff) << 16 | type & 0xffff);
@@ -436,7 +435,7 @@ final class Spdy3 implements Variant {
             ByteBufferList headerBlockBuffer = writeNameValueBlockToBuffer(headerBlock);
             int flags = 0;
             int type = TYPE_HEADERS;
-            int length = (int) (headerBlockBuffer.remaining() + 4);
+            int length = (headerBlockBuffer.remaining() + 4);
 
             ByteBuffer sink = ByteBufferList.obtain(256).order(ByteOrder.BIG_ENDIAN);
             sink.putInt(0x80000000 | (VERSION & 0x7fff) << 16 | type & 0xffff);
@@ -486,7 +485,7 @@ final class Spdy3 implements Variant {
         }
 
         ByteBufferList headerBlockList = new ByteBufferList();
-        private ByteBufferList writeNameValueBlockToBuffer(List<Header> headerBlock) throws IOException {
+        private ByteBufferList writeNameValueBlockToBuffer(List<Header> headerBlock) {
             if (headerBlockList.hasRemaining()) throw new IllegalStateException();
             ByteBuffer headerBlockOut = ByteBufferList.obtain(8192).order(ByteOrder.BIG_ENDIAN);
             headerBlockOut.putInt(headerBlock.size());
@@ -604,7 +603,7 @@ final class Spdy3 implements Variant {
         }
 
         @Override
-        public synchronized void close() throws IOException {
+        public synchronized void close() {
             closed = true;
         }
     }

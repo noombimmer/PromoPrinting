@@ -12,7 +12,7 @@ public class StringPart extends StreamPart {
     }
 
     @Override
-    protected InputStream getInputStream() throws IOException {
+    protected InputStream getInputStream() {
         return new ByteArrayInputStream(value.getBytes());
     }
 

@@ -287,7 +287,7 @@ final class Http20Draft13 implements Variant {
             readPriority(source, streamId);
         }
 
-        private void readPriority(ByteBufferList source, int streamId) throws IOException {
+        private void readPriority(ByteBufferList source, int streamId) {
             int w1 = source.getInt();
             boolean exclusive = (w1 & 0x80000000) != 0;
             int streamDependency = (w1 & 0x7fffffff);
@@ -498,7 +498,7 @@ final class Http20Draft13 implements Variant {
 
         private void writeContinuationFrames(ByteBufferList hpackBuffer, int streamId) throws IOException {
             while (hpackBuffer.hasRemaining()) {
-                int length = (int) Math.min(MAX_FRAME_SIZE, hpackBuffer.remaining());
+                int length = Math.min(MAX_FRAME_SIZE, hpackBuffer.remaining());
                 int newRemaining = hpackBuffer.remaining() - length;
                 frameHeader(streamId, length, TYPE_CONTINUATION, newRemaining == 0 ? FLAG_END_HEADERS : 0);
                 hpackBuffer.get(frameHeader, length);
@@ -611,11 +611,11 @@ final class Http20Draft13 implements Variant {
         }
 
         @Override
-        public synchronized void close() throws IOException {
+        public synchronized void close() {
             closed = true;
         }
 
-        void frameHeader(int streamId, int length, byte type, byte flags) throws IOException {
+        void frameHeader(int streamId, int length, byte type, byte flags) {
             if (logger.isLoggable(FINE))
                 logger.fine(FrameLogger.formatHeader(false, streamId, length, type, flags));
             if (length > MAX_FRAME_SIZE) {

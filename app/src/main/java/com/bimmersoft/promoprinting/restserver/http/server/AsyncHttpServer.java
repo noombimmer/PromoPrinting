@@ -311,7 +311,7 @@ public class AsyncHttpServer extends AsyncHttpServerRouter {
         return d;
     }
 
-    public static interface WebSocketRequestCallback {
+    public interface WebSocketRequestCallback {
         void onConnected(WebSocket webSocket, AsyncHttpServerRequest request);
     }
 

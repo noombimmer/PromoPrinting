@@ -16,12 +16,12 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Resizable-array implementation of the {@link Deque} interface.  Array
+ * Resizable-array implementation of the {ink Deque} interface.  Array
  * deques have no capacity restrictions; they grow as necessary to support
  * usage.  They are not thread-safe; in the absence of external
  * synchronization, they do not support concurrent access by multiple threads.
  * Null elements are prohibited.  This class is likely to be faster than
- * {@link Stack} when used as a stack, and faster than {@link LinkedList}
+ * {link Stack} when used as a stack, and faster than {link LinkedList}
  * when used as a queue.
  *
  * <p>Most <tt>ArrayDeque</tt> operations run in amortized constant time.
@@ -56,6 +56,7 @@ import java.util.NoSuchElementException;
  * @since   1.6
  * @param <E> the type of elements held in this collection
  */
+
 public class ArrayDeque<E> extends AbstractCollection<E>
                            implements Deque<E>, Cloneable, java.io.Serializable
 {
@@ -397,7 +398,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
      * <p>This method is equivalent to {@link #offerLast}.
      *
      * @param e the element to add
-     * @return <tt>true</tt> (as specified by {@link Queue#offer})
+     * @return <tt>true</tt> (as specified by {link Queue#offer})
      * @throws NullPointerException if the specified element is null
      */
     public boolean offer(E e) {
@@ -503,7 +504,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
      * elements backwards or forwards in the array.
      *
      * <p>This method is called delete rather than remove to emphasize
-     * that its semantics differ from those of {@link List#remove(int)}.
+     * that its semantics differ from those of {link Listremove(int)}.
      *
      * @return true if elements moved backwards
      */

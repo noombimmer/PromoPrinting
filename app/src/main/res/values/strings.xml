@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">PromoPrinting</string>
     <string name="img_print">Print Image</string>
+    <string name="btnSetting">Setting</string>
+    <string name="tv_Caption">Printer Connected</string>
+    <string name="btnStart">Start Service</string>
+    <string name="btnPrintTest2">Print A Test 2</string>
+    <string name="btnPrintTest1">Print A Test 1</string>
+    <string name="btnStopSVC">Stop Service</string>
+    <string name="tvBtName">tv_bluename</string>
+    <string name="btnBTAddress">tv_blueaddtess</string>
 </resources>

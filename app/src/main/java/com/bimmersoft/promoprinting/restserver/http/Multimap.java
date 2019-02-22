@@ -72,7 +72,7 @@ public class Multimap extends LinkedHashMap<String, List<String>> implements Ite
     }
 
     public interface StringDecoder {
-        public String decode(String s);
+        String decode(String s);
     }
 
     public static Multimap parse(String value, String delimiter, boolean unquote, StringDecoder decoder) {

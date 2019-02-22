@@ -6,10 +6,10 @@ import com.bimmersoft.promoprinting.restserver.callback.CompletedCallback;
 import com.bimmersoft.promoprinting.restserver.http.AsyncHttpRequest;
 
 public interface AsyncHttpRequestBody<T> {
-    public void write(AsyncHttpRequest request, DataSink sink, CompletedCallback completed);
-    public void parse(DataEmitter emitter, CompletedCallback completed);
-    public String getContentType();
-    public boolean readFullyOnRequest();
-    public int length();
-    public T get();
+    void write(AsyncHttpRequest request, DataSink sink, CompletedCallback completed);
+    void parse(DataEmitter emitter, CompletedCallback completed);
+    String getContentType();
+    boolean readFullyOnRequest();
+    int length();
+    T get();
 }

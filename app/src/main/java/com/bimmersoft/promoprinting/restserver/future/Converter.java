@@ -122,10 +122,7 @@ public class Converter<R> {
             if (!"*".equals(myParts[0]) && !otherParts[0].equals(myParts[0]))
                 return false;
 
-            if (!"*".equals(myParts[1]) && !otherParts[1].equals(myParts[1]))
-                return false;
-
-            return true;
+            return "*".equals(myParts[1]) || otherParts[1].equals(myParts[1]);
         }
 
         @Override

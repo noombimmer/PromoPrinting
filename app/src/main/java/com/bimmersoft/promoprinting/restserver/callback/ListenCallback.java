@@ -5,6 +5,6 @@ import com.bimmersoft.promoprinting.restserver.AsyncSocket;
 
 
 public interface ListenCallback extends CompletedCallback {
-    public void onAccepted(AsyncSocket socket);
-    public void onListening(AsyncServerSocket socket);
+    void onAccepted(AsyncSocket socket);
+    void onListening(AsyncServerSocket socket);
 }

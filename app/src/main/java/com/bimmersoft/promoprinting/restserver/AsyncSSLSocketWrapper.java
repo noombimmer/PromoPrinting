@@ -63,7 +63,7 @@ public class AsyncSSLSocketWrapper implements AsyncSocketWrapper, AsyncSSLSocket
     private static final String LOGTAG = "AsyncSSLSocketWrapper";
 
     public interface HandshakeCallback {
-        public void onHandshakeCompleted(Exception e, AsyncSSLSocket socket);
+        void onHandshakeCompleted(Exception e, AsyncSSLSocket socket);
     }
 
     static SSLContext defaultSSLContext;

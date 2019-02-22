@@ -15,7 +15,7 @@ public class ByteBufferListInputStream extends InputStream {
     }
 
     @Override
-    public int read() throws IOException {
+    public int read() {
         if (bb.remaining() <= 0)
             return -1;
         return (int)bb.get() & 0x000000ff;
@@ -27,7 +27,7 @@ public class ByteBufferListInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] buffer, int offset, int length) throws IOException {
+    public int read(byte[] buffer, int offset, int length) {
         if (bb.remaining() <= 0)
             return -1;
         int toRead = Math.min(length, bb.remaining());

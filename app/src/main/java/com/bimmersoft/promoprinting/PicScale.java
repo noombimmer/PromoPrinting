@@ -89,7 +89,7 @@ public class PicScale {
      * destination dimensions might be adjusted to a smaller size than
      * requested.
      */
-    public static enum ScalingLogic {
+    public enum ScalingLogic {
         CROP, FIT
     }
 
@@ -149,7 +149,7 @@ public class PicScale {
                 return new Rect(srcRectLeft, 0, srcRectLeft + srcRectWidth, srcHeight);
             } else {
                 final int srcRectHeight = (int)(srcWidth / dstAspect);
-                final int scrRectTop = (int)(srcHeight - srcRectHeight) / 2;
+                final int scrRectTop = (srcHeight - srcRectHeight) / 2;
                 return new Rect(0, scrRectTop, srcWidth, scrRectTop + srcRectHeight);
             }
         } else {

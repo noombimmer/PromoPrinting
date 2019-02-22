@@ -9,5 +9,5 @@ public interface FutureCallback<T> {
      * @param e Exception encountered by the operation
      * @param result Result returned from the operation
      */
-    public void onCompleted(Exception e, T result);
+    void onCompleted(Exception e, T result);
 }

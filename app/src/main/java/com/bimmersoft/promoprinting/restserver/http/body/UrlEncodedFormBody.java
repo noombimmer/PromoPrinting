@@ -12,6 +12,7 @@ import com.bimmersoft.promoprinting.restserver.http.NameValuePair;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class UrlEncodedFormBody implements AsyncHttpRequestBody<Multimap> {
@@ -41,7 +42,7 @@ public class UrlEncodedFormBody implements AsyncHttpRequestBody<Multimap> {
                 b.append('=');
                 b.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
             }
-            mBodyBytes = b.toString().getBytes("UTF-8");
+            mBodyBytes = b.toString().getBytes(StandardCharsets.UTF_8);
         }
         catch (UnsupportedEncodingException e) {
             throw new AssertionError(e);

@@ -32,7 +32,7 @@
 package com.bimmersoft.promoprinting.restserver.http;
 
 /**
- * The first line of an {@link HttpRequest HttpRequest}.
+ * The first line of an {link HttpRequest HttpRequest}.
  * It contains the method, URI, and HTTP version of the request.
  * For details, see RFC 2616.
  *

@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 /**
  * Settings describe characteristics of the sending peer, which are used by the receiving peer.
- * Settings are {@link com.bimmersoft.promoprinting.restserver.http.spdy.okhttp.internal.spdy.SpdyConnection connection} scoped.
+ * Settings are {link com.bimmersoft.promoprinting.restserver.http.spdy.okhttp.internal.spdy.SpdyConnection connection} scoped.
  */
 final class Settings {
   /**

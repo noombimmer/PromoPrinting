@@ -24,7 +24,7 @@ public class ChunkedInputFilter extends FilteredDataEmitter {
     private boolean checkByte(char b, char value) {
         if (b != value) {
             mState = State.ERROR;
-            report(new ChunkedDataException(value + " was expected, got " + (char)b));
+            report(new ChunkedDataException(value + " was expected, got " + b));
             return false;
         }
         return true;

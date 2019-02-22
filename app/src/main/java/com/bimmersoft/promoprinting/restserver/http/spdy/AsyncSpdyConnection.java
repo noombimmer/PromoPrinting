@@ -298,7 +298,7 @@ public class AsyncSpdyConnection implements FrameReader.Handler {
 
     /**
      * Sends a connection header if the current variant requires it. This should
-     * be called after {@link Builder#build} for all new connections.
+     * be called after {link Builder#build} for all new connections.
      */
     public void sendConnectionPreface() throws IOException {
         writer.connectionPreface();

@@ -14,7 +14,7 @@ import java.util.LinkedList;
 public class PushParser implements DataCallback {
 
     public interface ParseCallback<T> {
-        public void parsed(T data);
+        void parsed(T data);
     }
 
     static abstract class Waiter {

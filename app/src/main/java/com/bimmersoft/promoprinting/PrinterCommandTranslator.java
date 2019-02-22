@@ -264,7 +264,7 @@ public class PrinterCommandTranslator {
             return gabungkanDuaArray(penampung, take);
         } else {
             take[0] = toTake.substring(0, NORMAL_WIDTH_IN_CHAR - 1);
-            nextToTake = toTake.substring(NORMAL_WIDTH_IN_CHAR, toTake.length());
+            nextToTake = toTake.substring(NORMAL_WIDTH_IN_CHAR);
             return take24Char(gabungkanDuaArray(penampung, take), nextToTake);
         }
 

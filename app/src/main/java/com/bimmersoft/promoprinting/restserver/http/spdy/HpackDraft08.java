@@ -374,7 +374,7 @@ final class HpackDraft08 {
             headerTableByteCount += delta;
         }
 
-        private int readByte() throws IOException {
+        private int readByte() {
             return source.get() & 0xff;
         }
 
@@ -464,7 +464,7 @@ final class HpackDraft08 {
         }
 
         // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-08#section-4.1.1
-        void writeInt(ByteBuffer out, int value, int prefixMask, int bits) throws IOException {
+        void writeInt(ByteBuffer out, int value, int prefixMask, int bits) {
             // Write the raw value for a single byte value.
             if (value < prefixMask) {
                 out.put((byte) (bits | value));

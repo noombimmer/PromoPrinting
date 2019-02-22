@@ -34,8 +34,8 @@ import java.nio.charset.Charset;
  * to detect it after catching the {@code EOFException}.
  *
  * This class is intended for reading input that strictly consists of lines, such as line-based
- * cache entries or cache journal. Unlike the {@link BufferedReader} which in conjunction with
- * {@link InputStreamReader} provides similar functionality, this class uses different
+ * cache entries or cache journal. Unlike the {link BufferedReader} which in conjunction with
+ * {link InputStreamReader} provides similar functionality, this class uses different
  * end-of-input reporting and a more restrictive definition of a line.
  *
  * This class supports only charsets that encode '\r' and '\n' as a single byte with value 13

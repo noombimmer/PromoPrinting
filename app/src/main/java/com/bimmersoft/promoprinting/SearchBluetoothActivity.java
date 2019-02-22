@@ -39,9 +39,9 @@ public class SearchBluetoothActivity extends BluetoothActivity implements Adapte
     public void onCreate(@Nullable Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_searchbooth);
-        lv_searchblt = (ListView) findViewById(R.id.lv_searchblt);
-        tv_title = (TextView) findViewById(R.id.tv_title);
-        tv_summary = (TextView) findViewById(R.id.tv_summary);
+        lv_searchblt = findViewById(R.id.lv_searchblt);
+        tv_title = findViewById(R.id.tv_title);
+        tv_summary = findViewById(R.id.tv_summary);
         //初始化蓝牙适配器
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         searchBleAdapter = new SearchBleAdapter(SearchBluetoothActivity.this, null);

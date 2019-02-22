@@ -28,7 +28,7 @@ public class MultipartFormDataBody extends BoundaryEmitter implements AsyncHttpR
     Part lastPart;
 
     public interface MultipartCallback {
-        public void onPart(Part part);
+        void onPart(Part part);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class MultipartFormDataBody extends BoundaryEmitter implements AsyncHttpR
         for (final Part part: mParts) {
             c.add(new ContinuationCallback() {
                 @Override
-                public void onContinue(Continuation continuation, CompletedCallback next) throws Exception {
+                public void onContinue(Continuation continuation, CompletedCallback next) {
                     byte[] bytes = part.getRawHeaders().toPrefixString(getBoundaryStart()).getBytes();
                     com.bimmersoft.promoprinting.restserver.Util.writeAll(sink, bytes, next);
                     written += bytes.length;
@@ -156,7 +156,7 @@ public class MultipartFormDataBody extends BoundaryEmitter implements AsyncHttpR
             })
             .add(new ContinuationCallback() {
                 @Override
-                public void onContinue(Continuation continuation, CompletedCallback next) throws Exception {
+                public void onContinue(Continuation continuation, CompletedCallback next) {
                     long partLength = part.length();
                     if (partLength >= 0)
                         written += partLength;
@@ -165,7 +165,7 @@ public class MultipartFormDataBody extends BoundaryEmitter implements AsyncHttpR
             })
             .add(new ContinuationCallback() {
                 @Override
-                public void onContinue(Continuation continuation, CompletedCallback next) throws Exception {
+                public void onContinue(Continuation continuation, CompletedCallback next) {
                     byte[] bytes = "\r\n".getBytes();
                     com.bimmersoft.promoprinting.restserver.Util.writeAll(sink, bytes, next);
                     written += bytes.length;
@@ -174,7 +174,7 @@ public class MultipartFormDataBody extends BoundaryEmitter implements AsyncHttpR
         }
         c.add(new ContinuationCallback() {
             @Override
-            public void onContinue(Continuation continuation, CompletedCallback next) throws Exception {
+            public void onContinue(Continuation continuation, CompletedCallback next) {
                 byte[] bytes = (getBoundaryEnd()).getBytes();
                 com.bimmersoft.promoprinting.restserver.Util.writeAll(sink, bytes, next);
                 written += bytes.length;

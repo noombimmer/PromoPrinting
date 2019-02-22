@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public class AsyncHttpServerResponseImpl implements AsyncHttpServerResponse {
@@ -232,12 +233,7 @@ public class AsyncHttpServerResponseImpl implements AsyncHttpServerResponse {
 
     @Override
     public void send(String contentType, final String string) {
-        try {
-            send(contentType, string.getBytes("UTF-8"));
-        }
-        catch (UnsupportedEncodingException e) {
-            throw new AssertionError(e);
-        }
+        send(contentType, string.getBytes(StandardCharsets.UTF_8));
     }
     
     boolean mEnded;

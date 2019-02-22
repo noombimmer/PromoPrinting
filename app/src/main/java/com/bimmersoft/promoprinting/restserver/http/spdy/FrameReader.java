@@ -27,7 +27,7 @@ interface FrameReader {
 //    void readConnectionPreface() throws IOException;
 //  boolean nextFrame(Handler handler) throws IOException;
 
-    public interface Handler {
+    interface Handler {
         void error(Exception e);
 
         void data(boolean inFinished, int streamId, ByteBufferList bb);

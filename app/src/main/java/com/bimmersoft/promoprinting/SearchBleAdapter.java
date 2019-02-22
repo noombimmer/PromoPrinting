@@ -130,9 +130,9 @@ public class SearchBleAdapter extends BaseAdapter {
                 convertView.setTag(holder);
             }
         }
-        holder.name = (TextView) convertView.findViewById(R.id.txt_adapter_bt_name);
-        holder.address = (TextView) convertView.findViewById(R.id.txt_adapter_bt_address);
-        holder.bond = (TextView) convertView.findViewById(R.id.btn_adapter_bt_has_bond);
+        holder.name = convertView.findViewById(R.id.txt_adapter_bt_name);
+        holder.address = convertView.findViewById(R.id.txt_adapter_bt_address);
+        holder.bond = convertView.findViewById(R.id.btn_adapter_bt_has_bond);
 
         BluetoothDevice bluetoothDevice = mDevices.get(position);
         String dName = bluetoothDevice.getName() == null ? "Unknown device" : bluetoothDevice.getName();

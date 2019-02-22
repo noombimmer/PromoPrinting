@@ -4,13 +4,13 @@ import com.bimmersoft.promoprinting.restserver.callback.CompletedCallback;
 import com.bimmersoft.promoprinting.restserver.callback.WritableCallback;
 
 public interface DataSink {
-    public void write(ByteBufferList bb);
-    public void setWriteableCallback(WritableCallback handler);
-    public WritableCallback getWriteableCallback();
+    void write(ByteBufferList bb);
+    void setWriteableCallback(WritableCallback handler);
+    WritableCallback getWriteableCallback();
     
-    public boolean isOpen();
-    public void end();
-    public void setClosedCallback(CompletedCallback handler);
-    public CompletedCallback getClosedCallback();
-    public AsyncServer getServer();
+    boolean isOpen();
+    void end();
+    void setClosedCallback(CompletedCallback handler);
+    CompletedCallback getClosedCallback();
+    AsyncServer getServer();
 }

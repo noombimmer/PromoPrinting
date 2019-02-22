@@ -168,7 +168,7 @@ public class PicPrintEx {
 
         widthBytesZPL = width / 8;
         if (width % 8 > 0) {
-            widthBytesZPL = (((int) (width / 8)) + 1);
+            widthBytesZPL = (width / 8 + 1);
         } else {
             widthBytesZPL = width / 8;
         }

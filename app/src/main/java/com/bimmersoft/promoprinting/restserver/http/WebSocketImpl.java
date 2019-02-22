@@ -16,6 +16,7 @@ import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServerRespon
 
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class WebSocketImpl implements WebSocket {
     private static String SHA1(String text) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
-            md.update(text.getBytes("iso-8859-1"), 0, text.length());
+            md.update(text.getBytes(StandardCharsets.ISO_8859_1), 0, text.length());
             byte[] sha1hash = md.digest();
             return Base64.encodeToString(sha1hash, Base64.NO_WRAP);
         }
