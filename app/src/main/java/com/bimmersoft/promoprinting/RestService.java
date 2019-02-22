@@ -1,9 +1,12 @@
 package com.bimmersoft.promoprinting;
 
+import android.Manifest;
+import android.Manifest.permission;
 import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.Log;
 
 import com.bimmersoft.promoprinting.print.GPrinterCommand;
@@ -28,9 +31,17 @@ import com.bimmersoft.promoprinting.restserver.http.server.HttpServerRequestCall
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 /**
  * Created by liuguirong on 8/1/17.
@@ -42,6 +53,8 @@ public class RestService extends IntentService {
     public static final String ACTION_START = "start_svc";
     public static final String ACTION_STOP = "stop_svc";
     public static final String ACTION_FSTOP= "force_stop_svc";
+    int PERMISSION_REQUEST_COARSE_LOCATION = 2;
+    int READ_STORAGE_PERMISSION_REQUEST_CODE = 0x3;
 
     public RestService() {
         super("BtService");
@@ -63,6 +76,7 @@ public class RestService extends IntentService {
         }
         if (intent.getAction().equals(RestService.ACTION_START)) {
             //printTest();
+
             runRestFul();
         } else if (intent.getAction().equals(RestService.ACTION_STOP)) {
             //printTesttwo(3);
@@ -84,6 +98,7 @@ public class RestService extends IntentService {
             }
         });
         httpServer.listen(AsyncServer.getDefault(), 5000);
+
         httpServer.get("/popup_print", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
@@ -98,6 +113,50 @@ public class RestService extends IntentService {
                 //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
                 Log.e("Debug","http://127.0.0.1:5000/printing?FILE=" + str + "&ICON=" + icon);
                 response.redirect("http://127.0.0.1:5000/printing?FILE=" + str + "&ICON=" + icon);
+            }
+        });
+
+        httpServer.get("/file", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                //assertNotNull(request.getHeaders().get("Host"));
+                //assert(request.getHeaders().get("Host"));
+                String str =  request.getQuery().getString("FILE");
+                //String icon =  request.getQuery().getString("ICON");
+                //PicPrintEx pc = new PicPrintEx();
+                //pc.printBitmapTest(getApplicationContext(),
+                //pc.printBitmapZPl(getApplicationContext(),str);
+                //File fs = new File("/storage/emulated/0/Qr-4.png");
+                //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
+                Log.e("Debug","http://127.0.0.1:5000/file?FILE=" + str + "&ICON=");
+                //response.redirect("http://127.0.0.1:5000/printing?FILE=" + str + "&ICON=" + icon);
+                //response.sendFile(fs);
+
+                File fs = new File("/storage/emulated/0/Qr-4.png");
+                String mimeType = getMimeType("/storage/emulated/0/Qr-4.png");
+                Log.e("Debug11", (("File size:" + fs.length())));
+                FileInputStream fileStream = null;
+                try {
+                    fileStream = new FileInputStream(fs);
+                    byte[] bs = new byte[(int) fs.length()];
+                    int read = fileStream.read(bs, 0, bs.length);
+                    Log.e("Debug33", (("File size:" + bs.length)));
+                    //response.setContentType(mimeType);
+                    response.send(mimeType,bs);
+                    //response.sendFile(fs);
+                    Log.e("Debug44", (("Send File completed")));
+
+                } catch (FileNotFoundException e) {
+
+
+                    Log.e("Debug FileNotFoundException", e.getMessage());
+                }catch (IOException e) {
+                    Log.e("Debug IOException", e.getMessage());
+                }catch (Exception e) {
+                    Log.e("Debug Exception", e.getMessage());
+                }
+
+
             }
         });
 
@@ -179,6 +238,19 @@ public class RestService extends IntentService {
                 }
             }
         });
+    }
+    private String getMimeType(String filePath) {
+        String mimeType = AsyncHttpServer.getContentType(filePath);
+        Log.e("MimeType:",mimeType);
+        if ("text/plain".equals(mimeType)) {
+            if (filePath.endsWith(".mp3")) {
+                mimeType = "audio/mp3";
+            } else if (filePath.contains(".mp4?")) {
+                mimeType = "video/mp4";
+            }
+        }
+
+        return mimeType;
     }
 
 }
