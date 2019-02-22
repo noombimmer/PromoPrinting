@@ -52,8 +52,8 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv_bluename = findViewById(R.id.tv_bluename);
-        tv_blueadress = findViewById(R.id.tv_blueadress);
+        tv_bluename = (TextView) findViewById(R.id.tv_bluename);
+        tv_blueadress = (TextView) findViewById(R.id.tv_blueadress);
         findViewById(R.id.btn_setting).setOnClickListener(this);
         findViewById(R.id.button5).setOnClickListener(this);
         findViewById(R.id.button6).setOnClickListener(this);

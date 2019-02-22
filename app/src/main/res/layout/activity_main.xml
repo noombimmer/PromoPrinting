@@ -23,7 +23,7 @@
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="11dp"
-        />
+        android:text="tv_bluename" />
 
     <TextView
         android:id="@+id/tv_blueadress"
@@ -33,7 +33,7 @@
         android:layout_alignStart="@+id/tv_bluename"
         android:layout_alignLeft="@+id/tv_bluename"
         android:layout_marginTop="23dp"
-        />
+        android:text="tv_blueaddres" />
 
 
     <LinearLayout
