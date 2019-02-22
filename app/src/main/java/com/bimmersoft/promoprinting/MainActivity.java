@@ -3,9 +3,11 @@ package com.bimmersoft.promoprinting;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +32,11 @@ import com.bimmersoft.promoprinting.restserver.http.server.HttpServerRequestCall
 import com.bimmersoft.promoprinting.util.ToastUtil;
 
 import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import de.greenrobot.event.EventBus;
 
@@ -61,10 +68,21 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         findViewById(R.id.btnStopSVC).setOnClickListener(this);
         findViewById(R.id.btnStartSVC).setOnClickListener(this);
         //6.0以上的手机要地理位置权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_STORAGE_PERMISSION_REQUEST_CODE);
         }
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+        }
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+//            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_STORAGE_PERMISSION_REQUEST_CODE);
+//        }
 
         EventBus.getDefault().register(MainActivity.this);
         FilePath = Environment.getExternalStorageDirectory().getPath();
@@ -202,6 +220,37 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             }
         });
 
+        httpServer.get("/file", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                String str =  request.getQuery().getString("FILE");
+                Log.e("Debug","http://127.0.0.1:5000/file?FILE=" + str );
+
+                File fs = new File("/storage/emulated/0/" + str);
+                String mimeType = getMimeType("/storage/emulated/0/" + str);
+                Log.e("Debug11", (("File size:" + fs.length())));
+                FileInputStream fileStream = null;
+                try {
+                    fileStream = new FileInputStream(fs);
+                    byte[] bs = new byte[(int) fs.length()];
+                    int read = fileStream.read(bs, 0, bs.length);
+                    response.send(mimeType,bs);
+                    Log.e("Debug44", (("Send File completed")));
+                } catch (FileNotFoundException e) {
+                    Log.e("Debug FileNotFoundException", e.getMessage());
+                    response.send("<HTML><HEAD>TEST</HEAD> <BODY><H1>hello man.......<IMG SRC='"+str+"'></IMG></H1><H1>"+ e.getMessage() +"</H1><INPUT ID='TTT' TYPE='BUTTON' VALUE='TTTETETET'> </INPUT></BODY></HTML>");
+                }catch (IOException e) {
+                    Log.e("Debug IOException", e.getMessage());
+                    response.send("<HTML><HEAD>TEST</HEAD> <BODY><H1>hello man.......<IMG SRC='"+str+"'></IMG></H1><H1>"+ e.getMessage() +"</H1><INPUT ID='TTT' TYPE='BUTTON' VALUE='TTTETETET'> </INPUT></BODY></HTML>");
+                }catch (Exception e) {
+                    Log.e("Debug Exception", e.getMessage());
+                    response.send("<HTML><HEAD>TEST</HEAD> <BODY><H1>hello man.......<IMG SRC='"+str+"'></IMG></H1><H1>"+ e.getMessage() +"</H1><INPUT ID='TTT' TYPE='BUTTON' VALUE='TTTETETET'> </INPUT></BODY></HTML>");
+                }
+
+
+            }
+        });
+
         httpServer.get("/hello", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
@@ -233,7 +282,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
                         "<html>\n" +
                         "<body>\n" +
                         "<A HREF=\"http://127.0.0.1:5000/popup_print?FILE="+ str +"&ICON="+str_icon+"\" >\n" +
-                        "<img src=\"http://127.0.0.1:8080/"+str_icon+"\" ></img>\n" +
+                        "<img src=\"http://127.0.0.1:5000/file?FILE="+str_icon+"\" ></img>\n" +
                         "<!-- <button onclick=\"myFunction()\">Print this page</button> -->\n" +
                         "</A>\n" +
                         "<script>\n" +
@@ -280,6 +329,19 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
                 }
             }
         });
+    }
+    private String getMimeType(String filePath) {
+        String mimeType = AsyncHttpServer.getContentType(filePath);
+        Log.e("MimeType:",mimeType);
+        if ("text/plain".equals(mimeType)) {
+            if (filePath.endsWith(".mp3")) {
+                mimeType = "audio/mp3";
+            } else if (filePath.contains(".mp4?")) {
+                mimeType = "video/mp4";
+            }
+        }
+
+        return mimeType;
     }
 
 }

@@ -119,36 +119,20 @@ public class RestService extends IntentService {
         httpServer.get("/file", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-                //assertNotNull(request.getHeaders().get("Host"));
-                //assert(request.getHeaders().get("Host"));
                 String str =  request.getQuery().getString("FILE");
-                //String icon =  request.getQuery().getString("ICON");
-                //PicPrintEx pc = new PicPrintEx();
-                //pc.printBitmapTest(getApplicationContext(),
-                //pc.printBitmapZPl(getApplicationContext(),str);
-                //File fs = new File("/storage/emulated/0/Qr-4.png");
-                //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
-                Log.e("Debug","http://127.0.0.1:5000/file?FILE=" + str + "&ICON=");
-                //response.redirect("http://127.0.0.1:5000/printing?FILE=" + str + "&ICON=" + icon);
-                //response.sendFile(fs);
+                Log.e("Debug","http://127.0.0.1:5000/file?FILE=" + str );
 
-                File fs = new File("/storage/emulated/0/Qr-4.png");
-                String mimeType = getMimeType("/storage/emulated/0/Qr-4.png");
+                File fs = new File("/storage/emulated/0/" + str);
+                String mimeType = getMimeType("/storage/emulated/0/" + str);
                 Log.e("Debug11", (("File size:" + fs.length())));
                 FileInputStream fileStream = null;
                 try {
                     fileStream = new FileInputStream(fs);
                     byte[] bs = new byte[(int) fs.length()];
                     int read = fileStream.read(bs, 0, bs.length);
-                    Log.e("Debug33", (("File size:" + bs.length)));
-                    //response.setContentType(mimeType);
                     response.send(mimeType,bs);
-                    //response.sendFile(fs);
                     Log.e("Debug44", (("Send File completed")));
-
                 } catch (FileNotFoundException e) {
-
-
                     Log.e("Debug FileNotFoundException", e.getMessage());
                 }catch (IOException e) {
                     Log.e("Debug IOException", e.getMessage());
