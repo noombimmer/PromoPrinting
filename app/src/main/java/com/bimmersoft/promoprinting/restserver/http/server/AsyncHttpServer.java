@@ -31,11 +31,17 @@ import javax.net.ssl.SSLContext;
 public class AsyncHttpServer extends AsyncHttpServerRouter {
     ArrayList<AsyncServerSocket> mListeners = new ArrayList<AsyncServerSocket>();
     public void stop() {
+        Log.e("AsyncHttpServer","hash:" + mListeners.toString());
         if (mListeners != null) {
             for (AsyncServerSocket listener: mListeners) {
+                Log.e("AsyncHttpServer","listener-hash:" + listener.toString());
+
                 listener.stop();
+                //mListeners.remove(listener);
             }
+            AsyncServer.getDefault().stop();
         }
+
     }
     
     protected boolean onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {

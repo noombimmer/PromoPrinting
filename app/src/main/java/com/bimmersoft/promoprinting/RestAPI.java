@@ -1,21 +1,11 @@
 package com.bimmersoft.promoprinting;
 
-import android.Manifest;
-import android.Manifest.permission;
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
+import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.bimmersoft.promoprinting.print.GPrinterCommand;
-import com.bimmersoft.promoprinting.print.PrintPic;
-import com.bimmersoft.promoprinting.print.PrintQueue;
-import com.bimmersoft.promoprinting.print.PrintUtil;
-import com.bimmersoft.promoprinting.printutil.PrintOrderDataMaker;
-import com.bimmersoft.promoprinting.printutil.PrinterWriter;
-import com.bimmersoft.promoprinting.printutil.PrinterWriter58mm;
 import com.bimmersoft.promoprinting.restserver.AsyncServer;
 import com.bimmersoft.promoprinting.restserver.callback.CompletedCallback;
 import com.bimmersoft.promoprinting.restserver.http.NameValuePair;
@@ -30,63 +20,53 @@ import com.bimmersoft.promoprinting.restserver.http.server.HttpServerRequestCall
 
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.support.v4.app.ActivityCompat.requestPermissions;
+public class RestAPI extends Service {
+    public int PRINT_MODE;
+    public RestAPI() {
 
-/**
- * Created by liuguirong on 8/1/17.
- * <p/>
- * print ticket service
- */
-public class RestService extends IntentService {
-
-    public static final String ACTION_START = "start_svc";
-    public static final String ACTION_STOP = "stop_svc";
-    public static final String ACTION_FSTOP= "force_stop_svc";
-    int PERMISSION_REQUEST_COARSE_LOCATION = 2;
-    int READ_STORAGE_PERMISSION_REQUEST_CODE = 0x3;
-
-    public RestService() {
-        super("BtService");
+        PRINT_MODE = PRNT_ZPL_MODE;
     }
-
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public RestService(String name) {
-        super(name);
+    final static public int PRNT_ZPL_MODE =0x01;
+    final static public int PRNT_ESC_MODE = 0x02;
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
-            return;
-        }
-        if (intent.getAction().equals(RestService.ACTION_START)) {
-            //printTest();
+    public void onCreate() {
+        Toast.makeText(this, "Invoke background service onCreate method.", Toast.LENGTH_LONG).show();
+        super.onCreate();
+    }
 
-            runRestFul();
-        } else if (intent.getAction().equals(RestService.ACTION_STOP)) {
-            //printTesttwo(3);
-        }else if (intent.getAction().equals(RestService.ACTION_FSTOP)) {
-            //printBitmapTest();
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "Invoke background service onStartCommand method.", Toast.LENGTH_LONG).show();
+        runRestFul();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        httpServer.stop();
+        super.onDestroy();
+        Toast.makeText(this, "Invoke background service onDestroy method.", Toast.LENGTH_LONG).show();
+    }
+    public static void stop_listen(){
+        if(httpServer != null){
+            httpServer.stop();
+
         }
 
     }
-    AsyncHttpServer httpServer;
-    String FilePath;
+    public static AsyncHttpServer httpServer;
 
     public void runRestFul() {
         Log.e("HTTP-Server", "try to Start Service");
@@ -107,8 +87,15 @@ public class RestService extends IntentService {
                 String str =  request.getQuery().getString("FILE");
                 String icon =  request.getQuery().getString("ICON");
                 PicPrintEx pc = new PicPrintEx();
-                pc.printBitmapTest(getApplicationContext(),str);
-                //pc.printBitmapZPl(getApplicationContext(),str);
+                if (PRINT_MODE == PRNT_ESC_MODE) {
+                    /*for ESC Command */
+                    pc.printBitmapTest(getApplicationContext(), str);
+                    Log.i("Info","Print ESC Mode.");
+                }else if (PRINT_MODE == PRNT_ZPL_MODE ){
+                    /*for ZPL command*/
+                    pc.printBitmapZPl(getApplicationContext(),str);
+                    Log.i("Info","Print ZPL Mode.");
+                }
 
                 //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
                 Log.e("Debug","/printing?FILE=" + str + "&ICON=" + icon);
@@ -143,34 +130,11 @@ public class RestService extends IntentService {
 
             }
         });
-
-        httpServer.get("/hello", new HttpServerRequestCallback() {
-            @Override
-            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-                //assertNotNull(request.getHeaders().get("Host"));
-                //assert(request.getHeaders().get("Host"));
-                String str =  request.getQuery().getString("FILE");
-
-                PicPrintEx pc = new PicPrintEx();
-                pc.printBitmapTest(getApplicationContext(),str);
-                //pc.printBitmapZPl(getApplicationContext(),str);
-                response.send("<HTML><HEAD>TEST</HEAD> <BODY><H1>hello man.......<IMG SRC='"+str+"'></IMG></H1><H1>"+ FilePath +"</H1><INPUT ID='TTT' TYPE='BUTTON' VALUE='TTTETETET'> </INPUT></BODY></HTML>");
-            }
-        });
-
         httpServer.get("/printing", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-                //assertNotNull(request.getHeaders().get("Host"));
-                //assert(request.getHeaders().get("Host"));
-                //print("\r\n! U1 setvar \"device.languages\" \"zpl\"\r\n".getBytes());
-                //print("\r\n! U1 setvar \"zpl.label_length\" \"300\"\r\n".getBytes());
-                //senzpl();
                 String str =  request.getQuery().getString("FILE");
                 String str_icon =  request.getQuery().getString("ICON");
-
-                //PicPrintEx pc = new PicPrintEx();
-                //pc.printBitmapTest(getApplicationContext(),str);
                 String html_text = "<!DOCTYPE html>\n" +
                         "<html>\n" +
                         "<body>\n" +
@@ -194,34 +158,34 @@ public class RestService extends IntentService {
                 response.send(html_text);
             }
         });
-
-        httpServer.post("/echo", new HttpServerRequestCallback() {
-            @Override
-            public void onRequest(AsyncHttpServerRequest request, final AsyncHttpServerResponse response) {
-                try {
-                    //assertNotNull(request.getHeaders().get("Host"));
-                    JSONObject json = new JSONObject();
-                    if (request.getBody() instanceof UrlEncodedFormBody) {
-                        UrlEncodedFormBody body = request.getBody();
-                        for (NameValuePair pair : body.get()) {
-                            json.put(pair.getName(), pair.getValue());
-                        }
-                    } else if (request.getBody() instanceof JSONObjectBody) {
-                        json = ((JSONObjectBody) request.getBody()).get();
-                    } else if (request.getBody() instanceof StringBody) {
-                        json.put("foo", ((StringBody) request.getBody()).get());
-                    } else if (request.getBody() instanceof MultipartFormDataBody) {
-                        MultipartFormDataBody body = request.getBody();
-                        for (NameValuePair pair : body.get()) {
-                            json.put(pair.getName(), pair.getValue());
-                        }
-                    }
-
-                    response.send(json);
-                } catch (Exception e) {
-                }
-            }
-        });
+//
+//        httpServer.post("/echo", new HttpServerRequestCallback() {
+//            @Override
+//            public void onRequest(AsyncHttpServerRequest request, final AsyncHttpServerResponse response) {
+//                try {
+//                    //assertNotNull(request.getHeaders().get("Host"));
+//                    JSONObject json = new JSONObject();
+//                    if (request.getBody() instanceof UrlEncodedFormBody) {
+//                        UrlEncodedFormBody body = request.getBody();
+//                        for (NameValuePair pair : body.get()) {
+//                            json.put(pair.getName(), pair.getValue());
+//                        }
+//                    } else if (request.getBody() instanceof JSONObjectBody) {
+//                        json = ((JSONObjectBody) request.getBody()).get();
+//                    } else if (request.getBody() instanceof StringBody) {
+//                        json.put("foo", ((StringBody) request.getBody()).get());
+//                    } else if (request.getBody() instanceof MultipartFormDataBody) {
+//                        MultipartFormDataBody body = request.getBody();
+//                        for (NameValuePair pair : body.get()) {
+//                            json.put(pair.getName(), pair.getValue());
+//                        }
+//                    }
+//
+//                    response.send(json);
+//                } catch (Exception e) {
+//                }
+//            }
+//        });
     }
     private String getMimeType(String filePath) {
         String mimeType = AsyncHttpServer.getContentType(filePath);
@@ -236,5 +200,4 @@ public class RestService extends IntentService {
 
         return mimeType;
     }
-
 }
