@@ -3,15 +3,19 @@ package com.bimmersoft.promoprinting;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +53,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
 
     TextView tv_bluename;
     TextView tv_blueadress;
+    Button btnStartStop;
     boolean mBtEnable = true;
     int PERMISSION_REQUEST_COARSE_LOCATION = 2;
     int READ_STORAGE_PERMISSION_REQUEST_CODE = 0x3;
@@ -57,19 +62,31 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
      */
     BluetoothAdapter mAdapter;
     private String FilePath;
+    private RestAPI mRestAPI;
+    Context ctx;
+    Intent mServiceIntent;
 
+    public Context getCtx() {
+        return ctx;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ctx = this;
+
         setContentView(R.layout.activity_main);
+        mRestAPI = new RestAPI(getCtx());
+        mServiceIntent = new Intent(getCtx(), mRestAPI.getClass());
+
         tv_bluename = findViewById(R.id.tv_bluename);
         tv_blueadress = findViewById(R.id.tv_blueadress);
+        btnStartStop = findViewById(R.id.btnStartSVC);
         findViewById(R.id.btn_setting).setOnClickListener(this);
-        findViewById(R.id.btnPrintTest1).setOnClickListener(this);
-        findViewById(R.id.btnPrintTest1).setOnClickListener(this);
+        findViewById(R.id.btnShowContents).setOnClickListener(this);
+        findViewById(R.id.btnSyncConf).setOnClickListener(this);
         findViewById(R.id.btn_print_img).setOnClickListener(this);
         findViewById(R.id.btnStopSVC).setOnClickListener(this);
-        findViewById(R.id.btnStartSVC).setOnClickListener(this);
+        btnStartStop.setOnClickListener(this);
         //6.0以上的手机要地理位置权限
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -89,6 +106,14 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
 
         EventBus.getDefault().register(MainActivity.this);
         FilePath = Environment.getExternalStorageDirectory().getPath();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        if(preferences.getBoolean("print_svc_switch", true)){
+            strat_svc();
+        }
+        if(isMyServiceRunning(mRestAPI.getClass())){
+            btnStartStop.setEnabled(false);
+        }
+        Log.e("SVC:","STATUS : " + isMyServiceRunning(mRestAPI.getClass()));
         //runRestFul();
     }
 
@@ -113,87 +138,20 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             case R.id.btn_setting:
                 startActivity(new Intent(MainActivity.this, SearchBluetoothActivity.class));
                 break;
-            case R.id.btnPrintTest1:
-                if (TextUtils.isEmpty(AppInfo.btAddress)) {
-                    ToastUtil.showToast(MainActivity.this, "Please connect to Bluetooth...");
-                    startActivity(new Intent(MainActivity.this, SearchBluetoothActivity.class));
-                } else {
-                    if (mAdapter.getState() == BluetoothAdapter.STATE_OFF) {//蓝牙被关闭时强制打开
-                        mAdapter.enable();
-                        ToastUtil.showToast(MainActivity.this, "Bluetooth is turned off, please turn it on...");
-                    } else {
-                        ToastUtil.showToast(MainActivity.this, "Print test...");
-                        Intent intent = new Intent(getApplicationContext(), BtService.class);
-                        intent.setAction(PrintUtil.ACTION_PRINT_TEST);
-                        startService(intent);
-                    }
-
-                }
+            case R.id.btnShowContents:
+                startActivity(new Intent(MainActivity.this, ItemListActivity.class));
                 break;
-            case R.id.btnPrintTest2:
-                if (TextUtils.isEmpty(AppInfo.btAddress)) {
-                    ToastUtil.showToast(MainActivity.this, "Please connect to Bluetooth...");
-                    startActivity(new Intent(MainActivity.this, SearchBluetoothActivity.class));
-                } else {
-                    ToastUtil.showToast(MainActivity.this, "Print test...");
-                    Intent intent2 = new Intent(getApplicationContext(), BtService.class);
-                    intent2.setAction(PrintUtil.ACTION_PRINT_TEST_TWO);
-                    startService(intent2);
-
-                }
+            case R.id.btnSyncConf:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 break;
             case R.id.btnStopSVC:
-                Log.e("Test","BTN Stop ");
-
-                Intent stopServiceIntent = new Intent(MainActivity.this, RestAPI.class);
-                RestAPI.stop_listen();
-
-                if(stopService(stopServiceIntent)){
-                    Log.w("RestAPI","stop service true...");
-
-                }else{
-
-                    Log.w("RestAPI","stop service false...");
-                }
-
+                stop_svc();
                 break;
-
             case R.id.btnStartSVC:
-                Log.e("Test","BTN Start ");
-                //ToastUtil.showToast(MainActivity.this, "Start Rest Services.......");
-
-//                Intent intent2 = new Intent(getApplicationContext(), RestService.class);
-//                intent2.setAction(RestService.ACTION_START);
-//                startService(intent2);
-                Intent startServiceIntent = new Intent(MainActivity.this, RestAPI.class);
-                if (startService(startServiceIntent) != null){
-                    Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
-                    Log.w("RestAPI","service is already running");
-                }else{
-                    Log.i("RestAPI","Try to start service....");
-                }
-                //startService(startServiceIntent);
-
+                strat_svc();
                 break;
             case R.id.btn_print_img:
-                PicPrintEx pc = new PicPrintEx();
-                //pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
-                //pc.printBitmapZPl(getApplicationContext(),"20190130_102137.jpg");
-                pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
-
-/*
-                if (TextUtils.isEmpty(AppInfo.btAddress)) {
-                    ToastUtil.showToast(MainActivity.this, "Please connect to Bluetooth...");
-                    startActivity(new Intent(MainActivity.this, SearchBluetoothActivity.class));
-                } else {
-                    ToastUtil.showToast(MainActivity.this, "Print picture...");
-                    Intent intent2 = new Intent(getApplicationContext(), BtService.class);
-                    intent2.setAction(PrintUtil.ACTION_PRINT_BITMAP);
-                    startService(intent2);
-
-                }
-*/
-//                startActivity(new Intent(MainActivity.this,TextActivity.class));
+                print_images_test();
                 break;
         }
 
@@ -209,7 +167,76 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             ToastUtil.showToast(MainActivity.this, event.msg);
         }
     }
+    public void stop_svc(){
+        if(!isMyServiceRunning(mRestAPI.getClass())) {
+            Toast.makeText(getBaseContext(), "Service is not running...", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Log.e("Test","BTN Stop ");
+        //Intent stopServiceIntent = new Intent(MainActivity.this, RestAPI.class);
+        RestAPI.stop_listen();
+        stopService(mServiceIntent);
 
+    }
+    public void strat_svc(){
+        if(isMyServiceRunning(mRestAPI.getClass())){
+            Log.e("Test","BTN Start ");
+            //Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Log.e("Test","BTN Start ");
+        ToastUtil.showToast(MainActivity.this, "Start Rest Services.......");
+
+//                Intent intent2 = new Intent(getApplicationContext(), RestService.class);
+//                intent2.setAction(RestService.ACTION_START);
+//                startService(intent2);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
+        if (preferences.getBoolean("enbale_zpl_switch", true)) {
+            RestAPI.PRINT_MODE = RestAPI.PRNT_ZPL_MODE;
+        }else{
+            RestAPI.PRINT_MODE = RestAPI.PRNT_ESC_MODE;
+        }
+
+        //Intent startServiceIntent = new Intent(MainActivity.this, RestAPI.class);
+        if (startService(mServiceIntent) != null){
+            //Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
+            Log.w("RestAPI","service is already running");
+        }else{
+            Log.i("RestAPI","Try to start service....");
+        }
+        //startService(startServiceIntent);
+
+    }
+    public void print_images_test(){
+        PicPrintEx pc = new PicPrintEx();
+        //pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
+        //pc.printBitmapZPl(getApplicationContext(),"20190130_102137.jpg");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
+        if (preferences.getBoolean("enbale_zpl_switch", true)) {
+            pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
+        }else{
+            pc.printBitmapZPl(getApplicationContext(),"Qr-4.png");
+        }
+
+    }
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    @Override
+    protected void onDestroy() {
+        stopService(mServiceIntent);
+        Log.i("MAINACT", "onDestroy!");
+        super.onDestroy();
+
+    }
 //    @Override
 //    protected void onDestroy() {
 //        super.onDestroy();

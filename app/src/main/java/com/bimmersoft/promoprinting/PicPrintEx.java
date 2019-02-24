@@ -50,6 +50,7 @@ public class PicPrintEx {
 
 
         PrintPic printPic = PrintPic.getInstance();
+
         printPic.init(scaleLogo);
         if (null != scaleLogo) {
             if (scaleLogo.isRecycled()) {
@@ -65,6 +66,7 @@ public class PicPrintEx {
         printBytes.add(GPrinterCommand.reset);
         printBytes.add(GPrinterCommand.print);
         printBytes.add(bytes);
+        Log.e("BtService", "ESC COMMAND :" + bytes.toString());
         Log.e("BtService", "image bytes size is :" + bytes.length);
         printBytes.add(GPrinterCommand.print);
         PrintQueue.getQueue(ctx).add(bytes);

@@ -70,11 +70,14 @@ public class PrintPic {
         try {
             // Bitmap btm = BitmapFactory.decodeFile(path);
             this.canvas.drawBitmap(btm, x, y, null);
-            if (this.length < y + btm.getHeight())
-                this.length = (y + btm.getHeight());
+//            if (this.length < y + btm.getHeight())
+//                this.length = (y + btm.getHeight());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            if (this.length < y + btm.getHeight())
+                this.length = (y + btm.getHeight());
+
             if (null != btm) {
                 btm.recycle();
             }

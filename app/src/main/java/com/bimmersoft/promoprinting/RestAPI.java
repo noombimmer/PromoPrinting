@@ -1,8 +1,14 @@
 package com.bimmersoft.promoprinting;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,41 +30,69 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RestAPI extends Service {
-    public int PRINT_MODE;
+    private Context ctx;
+    public static int PRINT_MODE;
+    private static final String TAG = RestAPI.class.getSimpleName();
+    public RestAPI(Context applicationContext) {
+        super();
+        ctx = applicationContext;
+        Log.i("HERE", "here I am!");
+    }
+
     public RestAPI() {
 
-        PRINT_MODE = PRNT_ZPL_MODE;
+        PRINT_MODE = PRNT_ESC_MODE;
     }
     final static public int PRNT_ZPL_MODE =0x01;
     final static public int PRNT_ESC_MODE = 0x02;
+//    @Override
+//    public IBinder onBind(Intent intent) {
+//        // TODO: Return the communication channel to the service.
+//        throw new UnsupportedOperationException("Not yet implemented");
+//    }
     @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.i(TAG, "serviceonTaskRemoved()");
+
+
+
+        // workaround for kitkat: set an alarm service to trigger service again
+        Intent intent = new Intent(getApplicationContext(), RestAPI.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 5000, pendingIntent);
+
+        super.onTaskRemoved(rootIntent);
+
     }
-
-    @Override
-    public void onCreate() {
-        Toast.makeText(this, "Invoke background service onCreate method.", Toast.LENGTH_LONG).show();
-        super.onCreate();
-    }
-
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Invoke background service onStartCommand method.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Invoke background service onStartCommand method.", Toast.LENGTH_LONG).show();
+        super.onStartCommand(intent, flags, startId);
+        startTimer();
         runRestFul();
-        return super.onStartCommand(intent, flags, startId);
+        //return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        httpServer.stop();
-        super.onDestroy();
+
+        //httpServer.stop();
         Toast.makeText(this, "Invoke background service onDestroy method.", Toast.LENGTH_LONG).show();
+        Log.i("EXIT", "ondestroy!");
+        //Intent broadcastIntent = new Intent(ctx, RestAPIBroadcastRec.class);
+        Intent broadcastIntent = new Intent("com.bimmersoft.promoprinting.RestartSensor");
+        sendBroadcast(broadcastIntent);
+        stoptimertask();
+        //super.onDestroy();
     }
+    public int counter=0;
+
     public static void stop_listen(){
         if(httpServer != null){
             httpServer.stop();
@@ -87,14 +121,15 @@ public class RestAPI extends Service {
                 String str =  request.getQuery().getString("FILE");
                 String icon =  request.getQuery().getString("ICON");
                 PicPrintEx pc = new PicPrintEx();
+
                 if (PRINT_MODE == PRNT_ESC_MODE) {
                     /*for ESC Command */
                     pc.printBitmapTest(getApplicationContext(), str);
-                    Log.i("Info","Print ESC Mode.");
+                    Log.w("Info","Print ESC Mode.");
                 }else if (PRINT_MODE == PRNT_ZPL_MODE ){
                     /*for ZPL command*/
                     pc.printBitmapZPl(getApplicationContext(),str);
-                    Log.i("Info","Print ZPL Mode.");
+                    Log.w("Info","Print ZPL Mode.");
                 }
 
                 //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
@@ -199,5 +234,47 @@ public class RestAPI extends Service {
         }
 
         return mimeType;
+    }
+
+    private Timer timer;
+    private TimerTask timerTask;
+    long oldTime=0;
+    public void startTimer() {
+        //set a new Timer
+        timer = new Timer();
+
+        //initialize the TimerTask's job
+        initializeTimerTask();
+
+        //schedule the timer, to wake up every 1 second
+        timer.schedule(timerTask, 5000, 5000); //
+    }
+
+    /**
+     * it sets the timer to print the counter every x seconds
+     */
+    public void initializeTimerTask() {
+        timerTask = new TimerTask() {
+            public void run() {
+                Log.i("in timer", "in timer ++++  "+ (counter++));
+            }
+        };
+    }
+
+    /**
+     * not needed
+     */
+    public void stoptimertask() {
+        //stop the timer, if it's not already null
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }

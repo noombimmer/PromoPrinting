@@ -801,6 +801,7 @@ public class AsyncServer {
             if (needsSelect) {
                 if (wait == QUEUE_EMPTY) {
                     // wait until woken up
+                    //selector.wakeupOnce();
                     selector.select();
                 }
                 else {

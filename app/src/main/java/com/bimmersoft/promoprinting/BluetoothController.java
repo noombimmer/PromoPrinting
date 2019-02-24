@@ -39,8 +39,8 @@ public class BluetoothController {
             return;
         }
         String name = PrintUtil.getDefaultBluetoothDeviceName(activity.getApplicationContext());
-        activity.tv_bluename.setText("Bluetooth is bound：" + name);
-        activity.tv_blueadress.setText(address);
+        activity.tv_bluename.setText("Printer ：" + name);
+        activity.tv_blueadress.setText("MACADDR: " + address);
 
     }
     public static boolean turnOnBluetooth()
