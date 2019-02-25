@@ -18,16 +18,19 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning"
+        android:theme="@style/Theme.AppCompat"
+        >
+        <activity android:name=".RestTest"></activity>
+
         <receiver
             android:name=".RestAPIBroadcastRec"
             android:enabled="true"
             android:exported="true"
             android:label="RestartServiceWhenStopped">
             <intent-filter>
-                <action android:name="com.bimmersoft.promoprinting.RestartSensor"/>
+                <action android:name="com.bimmersoft.promoprinting.RestartSensor" />
             </intent-filter>
-
         </receiver>
 
         <activity
@@ -50,7 +53,7 @@
 
         <service
             android:name=".RestAPI"
-            android:enabled="true"/>
+            android:enabled="true" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -62,8 +65,6 @@
         <activity android:name=".SearchBluetoothActivity" />
 
         <service android:name=".BtService" />
-
-
     </application>
 
 </manifest>

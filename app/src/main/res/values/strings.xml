@@ -2,12 +2,12 @@
     <string name="app_name">PromoPrinting</string>
     <string name="img_print">Print Image</string>
     <string name="btnSetting">Connecting to printer</string>
-    <string name="tv_Caption">Printer Connected</string>
+    <string name="tv_Caption">Printer not ready</string>
     <string name="btnStart">Start Service</string>
     <string name="btnPrintTest1">Setting</string>
-    <string name="btnStopSVC">Stop Service</string>
+    <string name="btnStopSVC">Sync. Data</string>
     <string name="tvBtName">tv_bluename</string>
-    <string name="btnBTAddress">tv_blueaddtess</string>
+    <string name="btnBTAddress"></string>
     <string name="title_item_list">Items</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="btnPrintTest2">Show contents</string>

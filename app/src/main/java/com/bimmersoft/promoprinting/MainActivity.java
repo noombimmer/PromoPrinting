@@ -53,6 +53,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
 
     TextView tv_bluename;
     TextView tv_blueadress;
+    TextView tv_caption;
     Button btnStartStop;
     boolean mBtEnable = true;
     int PERMISSION_REQUEST_COARSE_LOCATION = 2;
@@ -77,7 +78,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         mRestAPI = new RestAPI(getCtx());
         mServiceIntent = new Intent(getCtx(), mRestAPI.getClass());
-
+        tv_caption = findViewById(R.id.textView);
         tv_bluename = findViewById(R.id.tv_bluename);
         tv_blueadress = findViewById(R.id.tv_blueadress);
         btnStartStop = findViewById(R.id.btnStartSVC);
@@ -111,7 +112,8 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             strat_svc();
         }
         if(isMyServiceRunning(mRestAPI.getClass())){
-            btnStartStop.setEnabled(false);
+            btnStartStop.setText("Stop Service");
+            //btnStartStop.setEnabled(false);
         }
         Log.e("SVC:","STATUS : " + isMyServiceRunning(mRestAPI.getClass()));
         //runRestFul();
@@ -145,10 +147,12 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 break;
             case R.id.btnStopSVC:
-                stop_svc();
+                //stop_svc();
+                startActivity(new Intent(MainActivity.this, RestTest.class));
                 break;
             case R.id.btnStartSVC:
-                strat_svc();
+                togleSvc();
+                //strat_svc();
                 break;
             case R.id.btn_print_img:
                 print_images_test();
@@ -176,6 +180,12 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         //Intent stopServiceIntent = new Intent(MainActivity.this, RestAPI.class);
         RestAPI.stop_listen();
         stopService(mServiceIntent);
+        if(!isMyServiceRunning(mRestAPI.getClass())){
+            RestAPI.httpServer.stop();
+            btnStartStop.setText("Start Service");
+            //btnStartStop.setEnabled(false);
+        }
+
 
     }
     public void strat_svc(){
@@ -206,6 +216,11 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             Log.i("RestAPI","Try to start service....");
         }
         //startService(startServiceIntent);
+        if(isMyServiceRunning(mRestAPI.getClass())){
+            btnStartStop.setText("Stop Service");
+            //btnStartStop.setEnabled(false);
+        }
+
 
     }
     public void print_images_test(){
@@ -215,9 +230,9 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
         if (preferences.getBoolean("enbale_zpl_switch", true)) {
-            pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
-        }else{
             pc.printBitmapZPl(getApplicationContext(),"Qr-4.png");
+        }else{
+            pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
         }
 
     }
@@ -229,6 +244,13 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             }
         }
         return false;
+    }
+    public void togleSvc(){
+        if(isMyServiceRunning(mRestAPI.getClass())){
+            stop_svc();
+        }else{
+            strat_svc();
+        }
     }
     @Override
     protected void onDestroy() {

@@ -1,6 +1,7 @@
 package com.bimmersoft.promoprinting;
 
 import android.bluetooth.BluetoothAdapter;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -19,6 +20,8 @@ public class BluetoothController {
         if (null == activity.mAdapter) {
             activity.tv_bluename.setText("The device does not have a Bluetooth module");
             activity.mBtEnable = false;
+            activity.tv_caption.setText("Printer not connect");
+            activity.tv_caption.setTextColor(Color.RED);
             return;
         }
         Log.d("activity.mAdapter.getState()","activity.mAdapter.getState()"+activity.mAdapter.getState());
@@ -30,17 +33,25 @@ public class BluetoothController {
 
             }else {
                 activity.tv_bluename.setText("Bluetooth is not turned on");
+                activity.tv_caption.setText("Printer not connect");
+                activity.tv_caption.setTextColor(Color.RED);
+
                 return;
             }
         }
         String address = PrintUtil.getDefaultBluethoothDeviceAddress(activity.getApplicationContext());
         if (TextUtils.isEmpty(address)) {
-            activity.tv_bluename.setText("Bluetooth device not yet bound");
+            activity.tv_bluename.setText("No Priner connect...");
+            activity.tv_caption.setText("Printer not connect");
+            activity.tv_caption.setTextColor(Color.RED);
+
             return;
         }
         String name = PrintUtil.getDefaultBluetoothDeviceName(activity.getApplicationContext());
         activity.tv_bluename.setText("Printer ：" + name);
         activity.tv_blueadress.setText("MACADDR: " + address);
+        activity.tv_caption.setText("Printer connected");
+        activity.tv_caption.setTextColor(Color.GREEN);
 
     }
     public static boolean turnOnBluetooth()

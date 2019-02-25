@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.apollographql.android'
 
 android {
     compileSdkVersion 28
@@ -45,4 +46,9 @@ dependencies {
     implementation 'com.android.support:cardview-v7:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:gridlayout-v7:28.0.0'
+    implementation 'com.squareup.retrofit:retrofit:1.9.0'
+    implementation 'com.squareup.picasso:picasso:2.3.2'
+    implementation 'com.squareup.okhttp:okhttp:2.7.5'
+    implementation 'com.apollographql.apollo:apollo-runtime:0.3.2'
+    implementation "com.apollographql.apollo:apollo-android-support:0.3.2"
 }
