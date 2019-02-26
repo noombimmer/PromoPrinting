@@ -60,7 +60,7 @@ public class ItemListActivity extends AppCompatActivity {
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
@@ -68,6 +68,16 @@ public class ItemListActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
