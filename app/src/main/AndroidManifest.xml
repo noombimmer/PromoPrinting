@@ -19,9 +19,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning"
-        android:theme="@style/Theme.AppCompat"
+
         >
-        <activity android:name=".RestTest"></activity>
+        <!--<activity android:name=".RestTest"></activity>-->
 
         <receiver
             android:name=".RestAPIBroadcastRec"

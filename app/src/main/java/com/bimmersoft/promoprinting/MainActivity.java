@@ -148,7 +148,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
                 break;
             case R.id.btnStopSVC:
                 //stop_svc();
-                startActivity(new Intent(MainActivity.this, RestTest.class));
+                //startActivity(new Intent(MainActivity.this, RestTest.class));
                 break;
             case R.id.btnStartSVC:
                 togleSvc();

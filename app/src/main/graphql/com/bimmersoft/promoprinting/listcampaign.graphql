@@ -1,0 +1,36 @@
+query getRetailerList{
+  getRetailerList {
+    total
+    items {
+     name
+    }
+  }
+}
+query getCampaignList($filter: JSON) {
+  getCampaignList(filter: $filter) {
+    total
+    items {
+      campaignId
+      startDate
+      endDate
+      _enabledAt
+      printAsset {
+        _id
+        filename
+        mimeType
+        path
+        sourceUrl
+      }
+      screenAsset {
+        _id
+        filename
+        mimeType
+        path
+        sourceUrl
+      }
+      retailer {
+        name
+      }
+    }
+  }
+}

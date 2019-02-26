@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -51,10 +52,20 @@ public class SearchBluetoothActivity extends BluetoothActivity implements Adapte
         lv_searchblt.setOnItemClickListener(this);
         tv_title.setOnClickListener(this);
         tv_summary.setOnClickListener(this);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
-
-
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                //do whatever
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     private void init() {
         if (!BtUtil.isOpen(bluetoothAdapter)) {
