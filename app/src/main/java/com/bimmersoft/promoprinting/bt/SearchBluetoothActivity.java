@@ -1,4 +1,4 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.bt;
 
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -15,8 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.bimmersoft.promoprinting.bt.BluetoothActivity;
-import com.bimmersoft.promoprinting.bt.BtUtil;
+import com.bimmersoft.promoprinting.R;
 import com.bimmersoft.promoprinting.print.PrintQueue;
 import com.bimmersoft.promoprinting.print.PrintUtil;
 import com.bimmersoft.promoprinting.util.ToastUtil;

@@ -6,7 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
-public class PrintPic {
+public class PrintPicEx {
     public Canvas canvas = null;
 
     public Paint paint = null;
@@ -17,12 +17,12 @@ public class PrintPic {
 
     public byte[] bitbuf = null;
 
-    private PrintPic() {
+    private PrintPicEx() {
     }
 
-    private static PrintPic instance = new PrintPic();
+    private static PrintPicEx instance = new PrintPicEx();
 
-    public static PrintPic getInstance() {
+    public static PrintPicEx getInstance() {
         return instance;
     }
 
@@ -73,16 +73,14 @@ public class PrintPic {
         try {
             // Bitmap btm = BitmapFactory.decodeFile(path);
             this.canvas.drawBitmap(btm, x, y, null);
-//            if (this.length < y + btm.getHeight())
-//                this.length = (y + btm.getHeight());
+            if (this.length < y + btm.getHeight())
+                this.length = (y + btm.getHeight());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (this.length < y + btm.getHeight())
-                this.length = (y + btm.getHeight());
 
             if (null != btm) {
-                btm.recycle();
+                //btm.recycle();
             }
         }
         Log.e("INFO", "Height: " + String.valueOf(btm.getHeight()));

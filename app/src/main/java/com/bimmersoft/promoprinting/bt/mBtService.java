@@ -1,4 +1,4 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.bt;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -26,9 +26,9 @@ import java.util.ArrayList;
  * <p/>
  * print ticket service
  */
-public class BtService extends IntentService {
+public class mBtService extends IntentService {
 
-    public BtService() {
+    public mBtService() {
         super("BtService");
     }
 
@@ -37,7 +37,7 @@ public class BtService extends IntentService {
      *
      * @param name Used to name the worker thread, important only for debugging.
      */
-    public BtService(String name) {
+    public mBtService(String name) {
         super(name);
     }
 

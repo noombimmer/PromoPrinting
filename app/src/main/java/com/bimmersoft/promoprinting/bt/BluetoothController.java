@@ -1,10 +1,11 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.bt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bimmersoft.promoprinting.MainActivity;
 import com.bimmersoft.promoprinting.print.PrintUtil;
 
 /**

@@ -1,21 +1,183 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.printutil;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.bimmersoft.promoprinting.print.GPrinterCommand;
 import com.bimmersoft.promoprinting.print.PrintPic;
+import com.bimmersoft.promoprinting.print.PrintPicEx;
 import com.bimmersoft.promoprinting.print.PrintQueue;
+import com.bimmersoft.promoprinting.restserver.RestAPI;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PicPrintEx {
+
+    public byte[] printBitmaptoFile(Context ctx, String filename) {
+        BufferedInputStream bis;
+        try {
+            //FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
+            FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        Bitmap bitmap = BitmapFactory.decodeStream(bis);
+
+        float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
+        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)(bitmap.getHeight() / ratio2) + 20,PicScale.ScalingLogic.FIT);
+
+
+        PrintPic printPic = PrintPic.getInstance();
+
+        printPic.init(scaleLogo);
+        if (null != scaleLogo) {
+            if (scaleLogo.isRecycled()) {
+                scaleLogo = null;
+            } else {
+                scaleLogo.recycle();
+                scaleLogo = null;
+            }
+        }
+
+        byte[] bytes = printPic.printDraw();
+        Log.e("BtService", "ESC COMMAND :" + bytes.toString());
+        return bytes;
+    }
+
+    public Bitmap printBitmaptoBitmap(Context ctx, String filename) {
+        BufferedInputStream bis;
+        Log.e("printBitmaptoBitmap","Read : " + filename);
+        try {
+            //FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
+            FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        Bitmap bitmap = BitmapFactory.decodeStream(bis);
+
+        float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
+        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)(bitmap.getHeight() / ratio2) + 20,PicScale.ScalingLogic.FIT);
+
+
+        PrintPicEx printPic = PrintPicEx.getInstance();
+
+        printPic.init(scaleLogo);
+
+        //byte[] bytes = printPic.printDraw();
+        //Log.e("BtService", "ESC COMMAND :" + bytes.toString());
+        return scaleLogo;
+    }
+    private byte[] convertArgbToGrayscale(Bitmap bmpOriginal, int width, int height){
+        int pixel;
+        int k = 0;
+        int B=0,G=0,R=0;
+        int mWidth = width;
+        int mHeight = height;
+        int mDataWidth=((mWidth+31)/32)*4*8;
+
+        byte[] mDataArray = new byte[(mDataWidth * mHeight)];
+        try{
+            for(int x = 0; x < height; x++) {
+                for(int y = 0; y < width; y++, k++) {
+                    // get one pixel color
+                    pixel = bmpOriginal.getPixel(y, x);
+
+                    // retrieve color of all channels
+                    R = Color.red(pixel);
+                    G = Color.green(pixel);
+                    B = Color.blue(pixel);
+                    // take conversion up to one single value by calculating pixel intensity.
+                    R = G = B = (int)(0.299 * R + 0.587 * G + 0.114 * B);
+                    // set new pixel color to output bitmap
+                    if (R < 128) {
+                        mDataArray[k] = 0;
+                    } else {
+                        mDataArray[k] = 1;
+                    }
+                }
+                if(mDataWidth>width){
+                    for(int p=width;p<mDataWidth;p++,k++){
+                        mDataArray[k]=1;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            // TODO: handle exception
+            Log.e("convertArgbToGrayscale Erro : ", e.toString());
+        }
+        return createRawMonochromeData(mDataArray,mDataWidth,mHeight);
+    }
+    private byte[] createRawMonochromeData(byte[] mDataArray,int mDataWidth,int mHeight){
+
+        byte[] mRawBitmapData = new byte[(mDataWidth * mHeight) / 8];
+        int length = 0;
+        for (int i = 0; i < mDataArray.length; i = i + 8) {
+            byte first = mDataArray[i];
+            for (int j = 0; j < 7; j++) {
+                byte second = (byte) ((first << 1) | mDataArray[i + j]);
+                first = second;
+            }
+            mRawBitmapData[length] = first;
+            length++;
+        }
+        return mRawBitmapData;
+    }
+    public byte[] printBitmaptoByte(Context ctx, String filename) {
+        BufferedInputStream bis;
+        Log.e("printBitmaptoByte","Read : " + filename);
+        try {
+            //FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
+            FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        Bitmap bitmap = BitmapFactory.decodeStream(bis);
+
+        float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
+        float ZPL_Height = (bitmap.getHeight() / ratio2) * 1.01f;
+        RestAPI.mZPLHeight = (int)ZPL_Height;
+        RestAPI.mZPLWidth = ZPL_width;
+        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)ZPL_Height,PicScale.ScalingLogic.FIT);
+
+        byte[] bitmapdata = convertArgbToGrayscale(scaleLogo,ZPL_width,(int)(ZPL_Height));
+        scaleLogo = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
+        //scaleLogo.set
+        PrintPicEx printPic = PrintPicEx.getInstance();
+
+        printPic.init(scaleLogo);
+
+        byte[] bytes = printPic.printDraw();
+        Log.e("BtService", "ESC Width :" + ZPL_width);
+        Log.e("BtService", "ESC Height :" + (int)ZPL_Height);
+
+//        int size = scaleLogo.getRowBytes() * scaleLogo.getHeight();
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+//        scaleLogo.copyPixelsToBuffer(byteBuffer);
+//        bitmapdata = byteBuffer.array();
+        //return convertArgbToGrayscale(scaleLogo,ZPL_width,(int)(ZPL_Height));
+        return bytes;
+    }
 
     public void printBitmapTest(Context ctx, String filename) {
         BufferedInputStream bis;
@@ -33,20 +195,9 @@ public class PicPrintEx {
             return;
         }
         Bitmap bitmap = BitmapFactory.decodeStream(bis);
+
         float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
         Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)(bitmap.getHeight() / ratio2) + 20,PicScale.ScalingLogic.FIT);
-        //Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.demo);
-//
-//        PrintPic printPic = PrintPic.getInstance();
-//        printPic.init(bitmap);
-//        if (null != bitmap) {
-//            if (bitmap.isRecycled()) {
-//                bitmap = null;
-//            } else {
-//                bitmap.recycle();
-//                bitmap = null;
-//            }
-//        }
 
 
         PrintPic printPic = PrintPic.getInstance();
@@ -69,9 +220,58 @@ public class PicPrintEx {
         Log.e("BtService", "ESC COMMAND :" + bytes.toString());
         Log.e("BtService", "image bytes size is :" + bytes.length);
         printBytes.add(GPrinterCommand.print);
+
         PrintQueue.getQueue(ctx).add(bytes);
     }
     public static int ZPL_width = 385;
+
+    public byte[] printBitmapZPlToFile(Context ctx, String filename) {
+        BufferedInputStream bis;
+        byte[] bytes;
+        bytes = null;
+        try {
+            PrinterCommandTranslator translator = new PrinterCommandTranslator();
+            ArrayList<byte[]> printBytes = new ArrayList<byte[]>();
+            FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
+            bis = new BufferedInputStream(fs);
+            Log.e("DEBUGER", "File :" + "/storage/emulated/0/" + filename);
+
+            Bitmap myLogo = BitmapFactory.decodeStream(bis);
+            int w =  myLogo.getWidth();
+            int h = myLogo.getHeight();
+
+            int ratio = h/w;
+            float ratio2 = ((float) w) / ((float)ZPL_width);
+
+            Log.e("DEBUGER", "Org-W :" + String.valueOf(w));
+            Log.e("DEBUGER", "Org-H :" + String.valueOf(h));
+            Log.e("DEBUGER", "Org-Ratio :" + String.valueOf(ratio));
+            Log.e("DEBUGER", "Org-FRatio :" + String.format("%.2f",ratio2));
+            Log.e("DEBUGER", "Tgt-w :" + String.valueOf(ZPL_width));
+            Log.e("DEBUGER", "Tgt-h :" + String.format("%.0f",h / ratio2));
+            Bitmap scaleLogo = PicScale.createScaledBitmap(myLogo,ZPL_width,(int)(h / ratio2),PicScale.ScalingLogic.FIT);
+
+
+            Log.e("DEBUGER", convertFromImageZPL(scaleLogo, true));
+
+            String CommandH = "\r\n! U1 setvar \"zpl.label_length\" \""+String.valueOf(tgt_height)+"\"\r\n";
+            Log.e("DEBUGER", CommandH);
+
+
+            printBytes.add("\r\n! U1 setvar \"device.languages\" \"zpl\"\r\n".getBytes());
+            printBytes.add(CommandH.getBytes());
+            bytes = convertFromImageZPL(scaleLogo, true).getBytes();
+            //printBytes.add(bytes);
+
+            //printBytes.add("\r\n! U1 setvar \"device.languages\" \"line_print\"\r\n".getBytes());
+            //printBytes.add(translator.toNormalRepeatTillEnd('-'));
+            //PrintQueue.getQueue(ctx).add(printBytes);
+        }catch(Exception e){
+            Log.e("Error",e.getMessage());
+        }
+        return bytes;
+
+    }
 
     public void printBitmapZPl(Context ctx, String filename) {
         BufferedInputStream bis;
@@ -316,5 +516,76 @@ public class PicPrintEx {
         mapCodeZPL.put(360, "x");
         mapCodeZPL.put(380, "y");
         mapCodeZPL.put(400, "z");
+    }
+    public void saveImage(String fileName, Bitmap bmp) {
+        File f = new File("/storage/emulated/0/", fileName);
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//Convert bitmap to byte array
+        Bitmap bitmap = bmp;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+
+//write the bytes in file
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(f);
+            fos.write(bitmapdata);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public void saveImage(String fileName, byte[] bmp) {
+        BMPFile bmpFile = new BMPFile();
+        Log.e("saveImage","Convert file :/storage/emulated/0/" + fileName);
+        File f = new File("/storage/emulated/0/", fileName);
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("saveImage","createNewFile Error : " + e.getMessage());
+        }
+
+//Convert bitmap to byte array
+//        Bitmap bitmap = bmp;
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bmp;
+
+//write the bytes in file
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(f);
+            fos.write(bitmapdata);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("saveImage","Error : " + e.getMessage());
+        }
+
+    }
+    public void saveImage(String fileName,byte[] mRawBitmapData, int width, int height) {
+        FileOutputStream fileOutputStream;
+        BMPFile bmpFile = new BMPFile();
+        File file = new File(Environment.getExternalStorageDirectory(), fileName + ".bmp");
+        try {
+            file.createNewFile();
+            fileOutputStream = new FileOutputStream(file);
+            bmpFile.saveBitmap(fileOutputStream, mRawBitmapData, width, height);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            //return "Memory Access Denied";
+        }
+
+        //return "Success";
     }
 }

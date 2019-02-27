@@ -1,4 +1,4 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.printutil;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

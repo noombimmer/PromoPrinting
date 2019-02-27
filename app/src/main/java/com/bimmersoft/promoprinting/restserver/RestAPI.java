@@ -1,30 +1,23 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.restserver;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.bimmersoft.promoprinting.restserver.AsyncServer;
+import com.bimmersoft.promoprinting.printutil.PicPrintEx;
 import com.bimmersoft.promoprinting.restserver.callback.CompletedCallback;
-import com.bimmersoft.promoprinting.restserver.http.NameValuePair;
-import com.bimmersoft.promoprinting.restserver.http.body.JSONObjectBody;
-import com.bimmersoft.promoprinting.restserver.http.body.MultipartFormDataBody;
-import com.bimmersoft.promoprinting.restserver.http.body.StringBody;
-import com.bimmersoft.promoprinting.restserver.http.body.UrlEncodedFormBody;
 import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServer;
 import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServerRequest;
 import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServerResponse;
 import com.bimmersoft.promoprinting.restserver.http.server.HttpServerRequestCallback;
-
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +30,8 @@ public class RestAPI extends Service {
     private Context ctx;
     public static int PRINT_MODE;
     private static final String TAG = RestAPI.class.getSimpleName();
+    public static int mZPLWidth;
+    public static int mZPLHeight;
     public RestAPI(Context applicationContext) {
         super();
         ctx = applicationContext;
@@ -165,6 +160,60 @@ public class RestAPI extends Service {
 
             }
         });
+        httpServer.get("/file_print", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+
+                String fn =  request.getQuery().getString("FILE");
+                String str;
+                str = "/storage/emulated/0/" + fn;
+                Log.e("onRequest","request.getQuery() :" + request.getQuery().toString());
+                //String icon =  request.getQuery().getString("ICON");
+                PicPrintEx pc = new PicPrintEx();
+                String mimeType = getMimeType("/storage/emulated/0/" + fn);
+
+                if (PRINT_MODE == PRNT_ESC_MODE) {
+                    /*for ESC Command */
+                    //pc.printBitmapTest(getApplicationContext(), str);
+                    Log.e("onRequest","Convert file :" + str);
+
+
+                    //ConvertInBackground convert = new ConvertInBackground();
+                    //convert.execute(str);
+
+                    byte[] data = pc.printBitmaptoByte(getApplicationContext(), str);
+
+                    pc.saveImage("output",data,mZPLWidth,mZPLHeight);
+                    //response.send(mimeType,pc.printBitmaptoFile(getApplicationContext(), str));
+
+//                    try (FileOutputStream out = new FileOutputStream(filename)) {
+//                        bmp.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+//                        // PNG is a lossless format, the compression factor (100) is ignored
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+
+                    response.redirect("/file?FILE=output.bmp&ORG=" + fn );
+                    Log.e("Info","Print ESC Mode.");
+                    //response.send("OK");
+                }else if (PRINT_MODE == PRNT_ZPL_MODE ){
+                    /*for ZPL command*/
+
+                    response.send(mimeType,pc.printBitmapZPlToFile(getApplicationContext(),str));
+                    //pc.printBitmapZPl(getApplicationContext(),str);
+                    Log.w("Info","Print ZPL Mode.");
+
+
+                }
+
+                //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
+                //Log.e("Debug","/printing?FILE=" + str + "&ICON=" + icon);
+                //response.redirect("/printing?FILE=" + str + "&ICON=" + icon);
+
+
+            }
+        });
+
         httpServer.get("/printing", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
@@ -276,5 +325,23 @@ public class RestAPI extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    class ConvertInBackground extends AsyncTask<String, String, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            // TODO Auto-generated method stub
+            PicPrintEx pc = new PicPrintEx();
+            Log.e("ConvertInBackground:doInBackground","param[0]:" + params[0]);
+            pc.saveImage("output.png",pc.printBitmaptoBitmap(getApplicationContext(), params[0]));
+
+            return null;
+        }
+
+
+
+
+
     }
 }

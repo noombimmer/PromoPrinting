@@ -1,4 +1,4 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.bt;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.bimmersoft.promoprinting.R;
 import com.bimmersoft.promoprinting.base.AppInfo;
 import com.bimmersoft.promoprinting.print.PrintUtil;
 
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 
 
 /**
- * Created by yefeng on 6/2/15.
  * github:yefengfreedom
  */
 public class SearchBleAdapter extends BaseAdapter {

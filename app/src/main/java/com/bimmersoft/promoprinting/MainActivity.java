@@ -7,42 +7,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bimmersoft.promoprinting.base.AppInfo;
 import com.bimmersoft.promoprinting.bt.BluetoothActivity;
+import com.bimmersoft.promoprinting.bt.BluetoothController;
+import com.bimmersoft.promoprinting.bt.SearchBluetoothActivity;
+import com.bimmersoft.promoprinting.items.ItemListActivity;
 import com.bimmersoft.promoprinting.print.PrintMsgEvent;
-import com.bimmersoft.promoprinting.print.PrintUtil;
 import com.bimmersoft.promoprinting.print.PrinterMsgType;
-import com.bimmersoft.promoprinting.restserver.AsyncServer;
-import com.bimmersoft.promoprinting.restserver.callback.CompletedCallback;
-import com.bimmersoft.promoprinting.restserver.http.NameValuePair;
-import com.bimmersoft.promoprinting.restserver.http.body.JSONObjectBody;
-import com.bimmersoft.promoprinting.restserver.http.body.MultipartFormDataBody;
-import com.bimmersoft.promoprinting.restserver.http.body.StringBody;
-import com.bimmersoft.promoprinting.restserver.http.body.UrlEncodedFormBody;
-import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServer;
-import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServerRequest;
-import com.bimmersoft.promoprinting.restserver.http.server.AsyncHttpServerResponse;
-import com.bimmersoft.promoprinting.restserver.http.server.HttpServerRequestCallback;
+import com.bimmersoft.promoprinting.printutil.PicPrintEx;
+import com.bimmersoft.promoprinting.restserver.RestAPI;
+import com.bimmersoft.promoprinting.settings.SettingsActivity;
 import com.bimmersoft.promoprinting.util.ToastUtil;
-
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import de.greenrobot.event.EventBus;
 
@@ -51,17 +34,17 @@ import de.greenrobot.event.EventBus;
  */
 public class MainActivity extends BluetoothActivity implements View.OnClickListener {
 
-    TextView tv_bluename;
-    TextView tv_blueadress;
-    TextView tv_caption;
-    Button btnStartStop;
-    boolean mBtEnable = true;
+    public TextView tv_bluename;
+    public TextView tv_blueadress;
+    public TextView tv_caption;
+    public Button btnStartStop;
+    public boolean mBtEnable = true;
     int PERMISSION_REQUEST_COARSE_LOCATION = 2;
     int READ_STORAGE_PERMISSION_REQUEST_CODE = 0x3;
     /**
      * bluetooth adapter
      */
-    BluetoothAdapter mAdapter;
+    public BluetoothAdapter mAdapter;
     private String FilePath;
     private RestAPI mRestAPI;
     Context ctx;
@@ -87,8 +70,18 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         findViewById(R.id.btnSyncConf).setOnClickListener(this);
         findViewById(R.id.btn_print_img).setOnClickListener(this);
         findViewById(R.id.btnStopSVC).setOnClickListener(this);
+
+        findViewById(R.id.btnStopSVC).setEnabled(false);
+        findViewById(R.id.btnShowContents).setEnabled(false);
         btnStartStop.setOnClickListener(this);
+
         //6.0以上的手机要地理位置权限
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 112);
+        }
+
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted

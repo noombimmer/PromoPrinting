@@ -1,4 +1,4 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.printutil;
 
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;

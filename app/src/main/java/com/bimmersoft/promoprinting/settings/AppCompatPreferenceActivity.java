@@ -1,4 +1,4 @@
-package com.bimmersoft.promoprinting;
+package com.bimmersoft.promoprinting.settings;
 
 import android.content.res.Configuration;
 import android.os.Bundle;

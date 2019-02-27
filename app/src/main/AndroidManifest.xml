@@ -25,7 +25,7 @@
         <!--<activity android:name=".RestTest"></activity>-->
 
         <receiver
-            android:name=".RestAPIBroadcastRec"
+            android:name=".restserver.RestAPIBroadcastRec"
             android:enabled="true"
             android:exported="true"
             android:label="RestartServiceWhenStopped">
@@ -35,25 +35,25 @@
         </receiver>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ItemListActivity"
+            android:name=".items.ItemListActivity"
             android:label="@string/title_item_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ItemDetailActivity"
+            android:name=".items.ItemDetailActivity"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".ItemListActivity"
+            android:parentActivityName=".items.ItemListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bimmersoft.promoprinting.ItemListActivity" />
+                android:value="com.bimmersoft.promoprinting.items.ItemListActivity" />
         </activity>
 
         <service
-            android:name=".RestAPI"
+            android:name=".restserver.RestAPI"
             android:enabled="true" />
 
         <activity android:name=".MainActivity">
@@ -63,7 +63,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchBluetoothActivity" />
+        <activity android:name=".bt.SearchBluetoothActivity" />
 
         <service android:name=".BtService" />
     </application>
