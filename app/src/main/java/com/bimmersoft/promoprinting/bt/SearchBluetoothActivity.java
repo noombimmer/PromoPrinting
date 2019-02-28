@@ -66,7 +66,7 @@ public class SearchBluetoothActivity extends BluetoothActivity implements Adapte
         }
     }
 
-    private void init() {
+    public void init() {
         if (!BtUtil.isOpen(bluetoothAdapter)) {
             tv_title.setText("Bluetooth printer not connected");
             tv_summary.setText("System Bluetooth is off, click to open");
@@ -233,7 +233,7 @@ public class SearchBluetoothActivity extends BluetoothActivity implements Adapte
      * @param bluetoothDevice
      */
 
-    private void connectBlt(BluetoothDevice bluetoothDevice) {
+    public void connectBlt(BluetoothDevice bluetoothDevice) {
         if (null != searchBleAdapter) {
             searchBleAdapter.setConnectedDeviceAddress(bluetoothDevice.getAddress());
         }

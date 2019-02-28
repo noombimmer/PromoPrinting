@@ -51,7 +51,7 @@ public class BtService {
     private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
-    private int mState;
+    public int mState;
     // context
     private Context mContext;
 

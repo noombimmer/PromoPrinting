@@ -15,6 +15,7 @@ import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory;
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper;
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory;
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport;
+import com.bimmersoft.promoprinting.base.AppInfo;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,11 +33,13 @@ public class PromoPrintingApplication extends Application {
     //private static final String SUBSCRIPTION_BASE_URL = "wss://api.githunt.com/subscriptions";
 
     private static final String SQL_CACHE_NAME = "takeshape";
-    private ApolloClient apolloClient;
+    public static ApolloClient apolloClient;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        AppInfo.init(getApplicationContext());
+
 /*
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .build();
@@ -55,18 +58,14 @@ public class PromoPrintingApplication extends Application {
         NormalizedCacheFactory normalizedCacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
                 .chain(new SqlNormalizedCacheFactory(apolloSqlHelper));
 
-/*
+
         CacheKeyResolver cacheKeyResolver = new CacheKeyResolver() {
             @NotNull
             @Override
             public CacheKey fromFieldRecordSet(@NotNull ResponseField field, @NotNull Map<String, Object> recordSet) {
                 String typeName = (String) recordSet.get("__typename");
-                if ("User".equals(typeName)) {
-                    String userKey = typeName + "." + recordSet.get("login");
-                    return CacheKey.from(userKey);
-                }
-                if (recordSet.containsKey("id")) {
-                    String typeNameAndIDKey = recordSet.get("__typename") + "." + recordSet.get("id");
+                if (recordSet.containsKey("campaignId")) {
+                    String typeNameAndIDKey = (String) recordSet.get("campaignId");
                     return CacheKey.from(typeNameAndIDKey);
                 }
                 return CacheKey.NO_KEY;
@@ -80,12 +79,12 @@ public class PromoPrintingApplication extends Application {
                 return CacheKey.NO_KEY;
             }
         };
-*/
+
 
         apolloClient = ApolloClient.builder()
                 .serverUrl(BASE_URL)
                 .okHttpClient(okHttpClient)
-               /* .normalizedCache(normalizedCacheFactory, cacheKeyResolver)*/
+                .normalizedCache(normalizedCacheFactory, cacheKeyResolver)
                 /*.subscriptionTransportFactory(new WebSocketSubscriptionTransport.Factory(SUBSCRIPTION_BASE_URL, okHttpClient))*/
                 .build();
     }

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bimmersoft.promoprinting.base.AppInfo;
 import com.bimmersoft.promoprinting.bt.BtService;
@@ -89,21 +90,38 @@ public class PrintQueue {
      */
     public synchronized void print() {
         try {
+
+            Log.e("btAddress:",AppInfo.btAddress == null?"btAddress is NULL":AppInfo.btAddress.toString());
+            Log.e("mBtService:",mBtService == null?"mBtService is NULL":mBtService.toString() );
+            Log.e("mAdapter:",mAdapter == null?"mAdapter is NULL":mAdapter.toString() );
+
             if (null == mQueue || mQueue.size() <= 0) {
                 return;
             }
-            if (null == mAdapter) {
+             if (null == mAdapter) {
                 mAdapter = BluetoothAdapter.getDefaultAdapter();
             }
+
             if (null == mBtService) {
                 mBtService = new BtService(mContext);
             }
-            if (mBtService.getState() != BtService.STATE_CONNECTED) {
+
+            Log.e("mAdapter:",mAdapter.toString());
+            Log.e("mBtService:",mBtService.toString());
+            Log.e("mBtService.getState:","State:" + mBtService.getState());
+            Log.e("mBtService.getState:","mState:" + mBtService.mState);
+            Log.e("mBtService.getState:","BtService.STATE_CONNECTED:" + BtService.STATE_CONNECTED);
+            //if ((mBtService.getState()*1) != (BtService.STATE_CONNECTED *1)) {
+            if (mBtService.mState != BtService.STATE_CONNECTED) {
+
                 if (!TextUtils.isEmpty(AppInfo.btAddress)) {
                     BluetoothDevice device = mAdapter.getRemoteDevice(AppInfo.btAddress);
                     mBtService.connect(device);
                     return;
                 }
+            }else{
+                Log.e("btAddress:",AppInfo.btAddress);
+                Log.e("mBtService.getState:","State:" + mBtService.getState());
             }
             while (mQueue.size() > 0) {
                 mBtService.write(mQueue.get(0));

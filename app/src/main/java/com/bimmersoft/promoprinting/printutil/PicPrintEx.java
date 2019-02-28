@@ -28,39 +28,6 @@ import java.util.Map;
 
 public class PicPrintEx {
 
-    public byte[] printBitmaptoFile(Context ctx, String filename) {
-        BufferedInputStream bis;
-        try {
-            //FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
-            FileInputStream fs = new FileInputStream( filename);
-            bis = new BufferedInputStream(fs);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        Bitmap bitmap = BitmapFactory.decodeStream(bis);
-
-        float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
-        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)(bitmap.getHeight() / ratio2) + 20,PicScale.ScalingLogic.FIT);
-
-
-        PrintPic printPic = PrintPic.getInstance();
-
-        printPic.init(scaleLogo);
-        if (null != scaleLogo) {
-            if (scaleLogo.isRecycled()) {
-                scaleLogo = null;
-            } else {
-                scaleLogo.recycle();
-                scaleLogo = null;
-            }
-        }
-
-        byte[] bytes = printPic.printDraw();
-        Log.e("BtService", "ESC COMMAND :" + bytes.toString());
-        return bytes;
-    }
-
     public Bitmap printBitmaptoBitmap(Context ctx, String filename) {
         BufferedInputStream bis;
         Log.e("printBitmaptoBitmap","Read : " + filename);
@@ -90,15 +57,17 @@ public class PicPrintEx {
         int pixel;
         int k = 0;
         int B=0,G=0,R=0;
-        int mWidth = width;
-        int mHeight = height;
+        int mWidth = bmpOriginal.getWidth();
+        int mHeight = bmpOriginal.getHeight();
         int mDataWidth=((mWidth+31)/32)*4*8;
 
         byte[] mDataArray = new byte[(mDataWidth * mHeight)];
+
         try{
-            for(int x = 0; x < height; x++) {
-                for(int y = 0; y < width; y++, k++) {
+            for(int x = 0; x < mHeight; x++) {
+                for(int y = 0; y < mWidth; y++, k++) {
                     // get one pixel color
+                    //Log.e("Xvalue","x:" + x + "<-"+y+"->bitmap.width()" + bmpOriginal.getWidth());
                     pixel = bmpOriginal.getPixel(y, x);
 
                     // retrieve color of all channels
@@ -122,7 +91,7 @@ public class PicPrintEx {
             }
         }catch (Exception e) {
             // TODO: handle exception
-            Log.e("convertArgbToGrayscale Erro : ", e.toString());
+            Log.e("convertArgb" , e.toString());
         }
         return createRawMonochromeData(mDataArray,mDataWidth,mHeight);
     }
@@ -178,16 +147,76 @@ public class PicPrintEx {
         //return convertArgbToGrayscale(scaleLogo,ZPL_width,(int)(ZPL_Height));
         return bytes;
     }
+    public void printBitmap(Context ctx, String filename) {
+        BufferedInputStream bis;
+        Log.e("printBitmaptoByte","Read : " + filename);
+        try {
+            FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
+            //FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ;
+        }
+        Bitmap bitmap = BitmapFactory.decodeStream(bis);
 
+        float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
+        float ZPL_Height = (bitmap.getHeight() / ratio2) * 1.0f;
+        RestAPI.mZPLHeight = (int)ZPL_Height;
+        RestAPI.mZPLWidth = ZPL_width;
+        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)ZPL_Height,PicScale.ScalingLogic.FIT);
+        Log.e("scaleLogo ",scaleLogo == null?"scaleLogo is null":scaleLogo.toString());
+        Log.e("scaleLogo ","w:" + (scaleLogo == null?"scaleLogo is null":scaleLogo.getWidth()));
+        Log.e("scaleLogo ","h:"+ (scaleLogo == null?"scaleLogo is null":scaleLogo.getHeight()));
+/*
+        byte[] bitmapdata = convertArgbToGrayscale(scaleLogo,scaleLogo.getWidth(),scaleLogo.getHeight());
+        Log.e("bitmapdata ",bitmapdata == null?"bitmapdata is null":bitmapdata.toString());
+        saveImage("output",bitmapdata,scaleLogo.getWidth(),scaleLogo.getHeight());
+        try {
+            FileInputStream fs = new FileInputStream("/storage/emulated/0/output.bmp" );
+            //FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ;
+        }*/
+        Bitmap tempBmp = toMono(scaleLogo);
+
+
+        Log.e("tempBmp ",tempBmp == null?"tempBmp is null":tempBmp.toString());
+
+        //scaleLogo.set
+
+        PrintPicEx printPic = PrintPicEx.getInstance();
+
+        printPic.init(tempBmp);
+
+        byte[] bytes = printPic.printDrawEx();
+
+
+        Log.e("BtService", "ESC Width :" + ZPL_width);
+        Log.e("BtService", "ESC Height :" + (int)ZPL_Height);
+
+        ArrayList<byte[]> printBytes = new ArrayList<byte[]>();
+        printBytes.add(GPrinterCommand.reset);
+        printBytes.add(GPrinterCommand.print);
+        printBytes.add(bytes);
+        Log.e("BtService", "ESC COMMAND :" + bytes.toString());
+        Log.e("BtService", "image bytes size is :" + bytes.length);
+        printBytes.add(GPrinterCommand.print);
+
+        PrintQueue.getQueue(ctx).add(printBytes);
+
+//        int size = scaleLogo.getRowBytes() * scaleLogo.getHeight();
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+//        scaleLogo.copyPixelsToBuffer(byteBuffer);
+//        bitmapdata = byteBuffer.array();
+        //return convertArgbToGrayscale(scaleLogo,ZPL_width,(int)(ZPL_Height));
+
+    }
     public void printBitmapTest(Context ctx, String filename) {
         BufferedInputStream bis;
         try {
-/*
-            bis = new BufferedInputStream(getAssets().open(
-                    "Qr-4.png"));
-*/
-
-            //File file = new File(Environment.getExternalStorageDirectory().getPath(),"/Qr-4.png");
             FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
             bis = new BufferedInputStream(fs);
         } catch (Exception e) {
@@ -197,7 +226,8 @@ public class PicPrintEx {
         Bitmap bitmap = BitmapFactory.decodeStream(bis);
 
         float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
-        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)(bitmap.getHeight() / ratio2) + 20,PicScale.ScalingLogic.FIT);
+        float ZPL_Height = (bitmap.getHeight() / ratio2) * 1.001f;
+        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)ZPL_Height,PicScale.ScalingLogic.FIT);
 
 
         PrintPic printPic = PrintPic.getInstance();
@@ -205,6 +235,7 @@ public class PicPrintEx {
         printPic.init(scaleLogo);
         if (null != scaleLogo) {
             if (scaleLogo.isRecycled()) {
+
                 scaleLogo = null;
             } else {
                 scaleLogo.recycle();
@@ -215,13 +246,15 @@ public class PicPrintEx {
         byte[] bytes = printPic.printDraw();
         ArrayList<byte[]> printBytes = new ArrayList<byte[]>();
         printBytes.add(GPrinterCommand.reset);
-        printBytes.add(GPrinterCommand.print);
+        //printBytes.add(GPrinterCommand.print);
         printBytes.add(bytes);
         Log.e("BtService", "ESC COMMAND :" + bytes.toString());
         Log.e("BtService", "image bytes size is :" + bytes.length);
         printBytes.add(GPrinterCommand.print);
+        //printBytes.add(GPrinterCommand.print);
+        //printBytes.add(GPrinterCommand.print);
 
-        PrintQueue.getQueue(ctx).add(bytes);
+        PrintQueue.getQueue(ctx).add(printBytes);
     }
     public static int ZPL_width = 385;
 
@@ -301,6 +334,7 @@ public class PicPrintEx {
             Log.e("DEBUGER", "Org-FRatio :" + String.format("%.2f",ratio2));
             Log.e("DEBUGER", "Tgt-w :" + String.valueOf(ZPL_width));
             Log.e("DEBUGER", "Tgt-h :" + String.format("%.0f",h / ratio2));
+
             Bitmap scaleLogo = PicScale.createScaledBitmap(myLogo,ZPL_width,(int)(h / ratio2),PicScale.ScalingLogic.FIT);
 
 
@@ -588,4 +622,35 @@ public class PicPrintEx {
 
         //return "Success";
     }
+    public static Bitmap toMono(Bitmap src){
+        int width = src.getWidth();
+        int height = src.getHeight();
+        // create output bitmap
+        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
+        // color information
+        int A, R, G, B;
+        int pixel;
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                // get pixel color
+                pixel = src.getPixel(x, y);
+                A = Color.alpha(pixel);
+                R = Color.red(pixel);
+                G = Color.green(pixel);
+                B = Color.blue(pixel);
+                int gray = (int) (0.2989 * R + 0.5870 * G + 0.1140 * B);
+                // use 128 as threshold, above -> white, below -> black
+                if (gray > 128) {
+                    gray = 255;
+                }
+                else{
+                    gray = 0;
+                }
+                // set new pixel color to output bitmap
+                bmOut.setPixel(x, y, Color.argb(A, gray, gray, gray));
+            }
+        }
+        return bmOut;
+    }
+
 }

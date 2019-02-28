@@ -6,6 +6,11 @@ query getRetailerList{
     }
   }
 }
+
+fragment RetailerFragment on Retailer {
+    name
+}
+
 query getCampaignList($filter: JSON) {
   getCampaignList(filter: $filter) {
     total
@@ -33,4 +38,27 @@ query getCampaignList($filter: JSON) {
       }
     }
   }
+}
+
+fragment CampaignFragment on Campaign {
+  campaignId
+  startDate
+  endDate
+
+  printAsset {
+    filename
+    mimeType
+    path
+    sourceUrl
+  }
+  screenAsset {
+    filename
+    mimeType
+    path
+    sourceUrl
+  }
+  retailer {
+    name
+  }
+
 }

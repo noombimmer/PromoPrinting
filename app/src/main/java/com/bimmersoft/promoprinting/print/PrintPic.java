@@ -56,7 +56,8 @@ public class PrintPic {
     }
 
     public void initPaint() {
-        this.paint = new Paint();// 新建一个画笔
+        this.paint = new Paint();// Create a new brush
+
 
         this.paint.setAntiAlias(true);//
 
@@ -73,13 +74,13 @@ public class PrintPic {
         try {
             // Bitmap btm = BitmapFactory.decodeFile(path);
             this.canvas.drawBitmap(btm, x, y, null);
-//            if (this.length < y + btm.getHeight())
-//                this.length = (y + btm.getHeight());
+            if (this.length < y + btm.getHeight())
+                this.length = (y + btm.getHeight());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (this.length < y + btm.getHeight())
-                this.length = (y + btm.getHeight());
+//            if (this.length < y + btm.getHeight())
+//                this.length = (y + btm.getHeight());
 
             if (null != btm) {
                 btm.recycle();
@@ -89,9 +90,9 @@ public class PrintPic {
     }
 
     /**
-     * 使用光栅位图打印
+     * Print using raster bitmaps
      *
-     * @return 字节
+     * @return byte
      */
     //public int gWidht = 385;
     public byte[] printDraw() {
@@ -106,28 +107,31 @@ public class PrintPic {
 
         int s = 0;
 
-        // 打印光栅位图的指令
-        imgbuf[0] = 29;// 十六进制0x1D
-        imgbuf[1] = 118;// 十六进制0x76
+        // Instructions for printing raster bitmaps
+        imgbuf[0] = 29;// Hexadecimal 0x1D
+        imgbuf[1] = 118;// Hexadecimal 0x76
         imgbuf[2] = 48;// 30
-        imgbuf[3] = 0;// 位图模式 0,1,2,3
-        // 表示水平方向位图字节数（xL+xH × 256）
-        imgbuf[4] = (byte) (this.width / 8);
+        imgbuf[3] = 0;// Bitmap mode 0,1,2,3
+        // Indicates the number of bitmap bits in the horizontal direction（xL+xH × 256）
+        imgbuf[4] = (byte) ((this.width)/ 8);
         imgbuf[5] = 0;
-        // 表示垂直方向位图点数（ yL+ yH × 256）
+        // Indicates the number of bitmap points in the vertical direction（ yL+ yH × 256）
         imgbuf[6] = (byte) (getLength() % 256);//
         imgbuf[7] = (byte) (getLength() / 256);
 
         s = 7;
-        for (int i = 0; i < getLength(); i++) {// 循环位图的高度
-            for (int k = 0; k < this.width / 8; k++) {// 循环位图的宽度
-                int c0 = nbm.getPixel(k * 8 + 0, i);// 返回指定坐标的颜色
+        for (int i = 0; i < getLength(); i++) {// The height of the loop bitmap
+            for (int k = 0; k < this.width / 8; k++) {// The width of the loop bitmap
+                int c0 = nbm.getPixel(k * 8 + 0, i);// Returns the color of the specified coordinates
+
                 int p0;
-                if (c0 == -1)// 判断颜色是不是白色
-                    p0 = 0;// 0,不打印该点
+                //if (c0 == -1)// Determine if the color is white
+                if (c0 >= -1)// Determine if the color is white
+                    p0 = 0;// 0,Do not print this point
                 else {
-                    p0 = 1;// 1,打印该点
+                    p0 = 1;// 1,Print this point
                 }
+
                 int c1 = nbm.getPixel(k * 8 + 1, i);
                 int p1;
                 if (c1 == -1)

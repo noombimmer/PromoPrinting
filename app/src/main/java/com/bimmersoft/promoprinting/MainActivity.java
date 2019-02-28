@@ -16,10 +16,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bimmersoft.promoprinting.TakeShape.CampaignListActivity;
+import com.bimmersoft.promoprinting.base.App;
 import com.bimmersoft.promoprinting.bt.BluetoothActivity;
 import com.bimmersoft.promoprinting.bt.BluetoothController;
 import com.bimmersoft.promoprinting.bt.SearchBluetoothActivity;
-import com.bimmersoft.promoprinting.items.ItemListActivity;
 import com.bimmersoft.promoprinting.print.PrintMsgEvent;
 import com.bimmersoft.promoprinting.print.PrinterMsgType;
 import com.bimmersoft.promoprinting.printutil.PicPrintEx;
@@ -50,6 +51,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     Context ctx;
     Intent mServiceIntent;
 
+
     public Context getCtx() {
         return ctx;
     }
@@ -65,14 +67,14 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         tv_bluename = findViewById(R.id.tv_bluename);
         tv_blueadress = findViewById(R.id.tv_blueadress);
         btnStartStop = findViewById(R.id.btnStartSVC);
-        findViewById(R.id.btn_setting).setOnClickListener(this);
+        findViewById(R.id.btnBTConnect).setOnClickListener(this);
         findViewById(R.id.btnShowContents).setOnClickListener(this);
-        findViewById(R.id.btnSyncConf).setOnClickListener(this);
+        findViewById(R.id.btnSettings).setOnClickListener(this);
         findViewById(R.id.btn_print_img).setOnClickListener(this);
-        findViewById(R.id.btnStopSVC).setOnClickListener(this);
+        findViewById(R.id.btnSyncTakeShape).setOnClickListener(this);
 
-        findViewById(R.id.btnStopSVC).setEnabled(false);
-        findViewById(R.id.btnShowContents).setEnabled(false);
+        //findViewById(R.id.btnSyncTakeShape).setEnabled(false);
+        //findViewById(R.id.btnShowContents).setEnabled(false);
         btnStartStop.setOnClickListener(this);
 
         //6.0以上的手机要地理位置权限
@@ -102,7 +104,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         FilePath = Environment.getExternalStorageDirectory().getPath();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         if(preferences.getBoolean("print_svc_switch", true)){
-            strat_svc();
+            //strat_svc();
         }
         if(isMyServiceRunning(mRestAPI.getClass())){
             btnStartStop.setText("Stop Service");
@@ -110,6 +112,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         }
         Log.e("SVC:","STATUS : " + isMyServiceRunning(mRestAPI.getClass()));
         //runRestFul();
+
     }
 
     @Override
@@ -130,16 +133,16 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_setting:
+            case R.id.btnBTConnect:
                 startActivity(new Intent(MainActivity.this, SearchBluetoothActivity.class));
                 break;
             case R.id.btnShowContents:
-                startActivity(new Intent(MainActivity.this, ItemListActivity.class));
+                startActivity(new Intent(MainActivity.this, CampaignListActivity.class));
                 break;
-            case R.id.btnSyncConf:
+            case R.id.btnSettings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 break;
-            case R.id.btnStopSVC:
+            case R.id.btnSyncTakeShape:
                 //stop_svc();
                 //startActivity(new Intent(MainActivity.this, RestTest.class));
                 break;
@@ -222,10 +225,11 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         //pc.printBitmapZPl(getApplicationContext(),"20190130_102137.jpg");
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
-        if (preferences.getBoolean("enbale_zpl_switch", true)) {
+        if (preferences.getBoolean("enbale_zpl_switch", false)) {
             pc.printBitmapZPl(getApplicationContext(),"Qr-4.png");
         }else{
-            pc.printBitmapTest(getApplicationContext(),"Qr-4.png");
+            //pc.printBitmapTest(getApplicationContext(),"20190130_102137.jpg");
+            pc.printBitmap(getApplicationContext(),"20190130_102137.jpg");
         }
 
     }
