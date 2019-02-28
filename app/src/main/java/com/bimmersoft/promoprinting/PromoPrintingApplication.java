@@ -55,36 +55,37 @@ public class PromoPrintingApplication extends Application {
                 })
                 .build();
         ApolloSqlHelper apolloSqlHelper = new ApolloSqlHelper(this, SQL_CACHE_NAME);
-        NormalizedCacheFactory normalizedCacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
-                .chain(new SqlNormalizedCacheFactory(apolloSqlHelper));
+
+//        NormalizedCacheFactory normalizedCacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
+//                .chain(new SqlNormalizedCacheFactory(apolloSqlHelper));
 
 
-        CacheKeyResolver cacheKeyResolver = new CacheKeyResolver() {
-            @NotNull
-            @Override
-            public CacheKey fromFieldRecordSet(@NotNull ResponseField field, @NotNull Map<String, Object> recordSet) {
-                String typeName = (String) recordSet.get("__typename");
-                if (recordSet.containsKey("campaignId")) {
-                    String typeNameAndIDKey = (String) recordSet.get("campaignId");
-                    return CacheKey.from(typeNameAndIDKey);
-                }
-                return CacheKey.NO_KEY;
-            }
-
-            // Use this resolver to customize the key for fields with variables: eg entry(repoFullName: $repoFullName).
-            // This is useful if you want to make query to be able to resolved, even if it has never been run before.
-            @NotNull
-            @Override
-            public CacheKey fromFieldArguments(@NotNull ResponseField field, @NotNull Operation.Variables variables) {
-                return CacheKey.NO_KEY;
-            }
-        };
+//        CacheKeyResolver cacheKeyResolver = new CacheKeyResolver() {
+//            @NotNull
+//            @Override
+//            public CacheKey fromFieldRecordSet(@NotNull ResponseField field, @NotNull Map<String, Object> recordSet) {
+//                String typeName = (String) recordSet.get("__typename");
+//                if (recordSet.containsKey("campaignId")) {
+//                    String typeNameAndIDKey = (String) recordSet.get("campaignId");
+//                    return CacheKey.from(typeNameAndIDKey);
+//                }
+//                return CacheKey.NO_KEY;
+//            }
+//
+//            // Use this resolver to customize the key for fields with variables: eg entry(repoFullName: $repoFullName).
+//            // This is useful if you want to make query to be able to resolved, even if it has never been run before.
+//            @NotNull
+//            @Override
+//            public CacheKey fromFieldArguments(@NotNull ResponseField field, @NotNull Operation.Variables variables) {
+//                return CacheKey.NO_KEY;
+//            }
+//        };
 
 
         apolloClient = ApolloClient.builder()
                 .serverUrl(BASE_URL)
                 .okHttpClient(okHttpClient)
-                .normalizedCache(normalizedCacheFactory, cacheKeyResolver)
+                //.normalizedCache(normalizedCacheFactory, cacheKeyResolver)
                 /*.subscriptionTransportFactory(new WebSocketSubscriptionTransport.Factory(SUBSCRIPTION_BASE_URL, okHttpClient))*/
                 .build();
     }

@@ -104,7 +104,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         FilePath = Environment.getExternalStorageDirectory().getPath();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         if(preferences.getBoolean("print_svc_switch", true)){
-            //strat_svc();
+            strat_svc();
         }
         if(isMyServiceRunning(mRestAPI.getClass())){
             btnStartStop.setText("Stop Service");
@@ -229,7 +229,8 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             pc.printBitmapZPl(getApplicationContext(),"Qr-4.png");
         }else{
             //pc.printBitmapTest(getApplicationContext(),"20190130_102137.jpg");
-            pc.printBitmap(getApplicationContext(),"20190130_102137.jpg");
+            //pc.printBitmap(getApplicationContext(),"20190130_102137.jpg");
+            pc.printCampaign(getApplicationContext(),"C000001");
         }
 
     }

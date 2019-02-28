@@ -19,11 +19,24 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning"
-
-        >
-        <!--<activity android:name=".RestTest"></activity>-->
-
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        <receiver
+            android:name=".BroadcastReceiverOnBootComplete"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+        <!-- <activity android:name=".RestTest"></activity> -->
         <receiver
             android:name=".restserver.RestAPIBroadcastRec"
             android:enabled="true"
@@ -42,15 +55,6 @@
             android:name=".TakeShape.CampaignListActivity"
             android:label="@string/title_item_list"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".items.ItemDetailActivity"
-            android:label="@string/title_item_detail"
-            android:parentActivityName=".items.ItemListActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bimmersoft.promoprinting.items.ItemListActivity" />
-        </activity>
 
         <service
             android:name=".restserver.RestAPI"
@@ -65,7 +69,7 @@
         </activity>
         <activity android:name=".bt.SearchBluetoothActivity" />
 
-        <service android:name=".BtService" />
+
     </application>
 
 </manifest>

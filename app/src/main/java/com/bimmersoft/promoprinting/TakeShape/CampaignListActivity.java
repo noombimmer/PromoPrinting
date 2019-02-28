@@ -1,6 +1,7 @@
 package com.bimmersoft.promoprinting.TakeShape;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,10 +47,11 @@ public class CampaignListActivity extends AppCompatActivity {
             //ApolloClient takeshape = apolloClient;
             //fetchPosts();
             Log.e("mStatusChecker"," mProcRun :" + mProcRun);
-            if (!mProcRun) {
+           //if (!mProcRun) {
                 progressBar.setVisibility(View.VISIBLE);
+
                 fetchPosts(); //this function can change value of mInterval.
-            }
+            //}
 
 
         }
@@ -113,7 +115,7 @@ public class CampaignListActivity extends AppCompatActivity {
         PromoPrintingApplication.apolloClient.query(
                 GetCampaignListQuery.builder()
                         .build()
-        ).httpCachePolicy(HttpCachePolicy.CACHE_FIRST)
+        ).httpCachePolicy(HttpCachePolicy.NETWORK_FIRST)
                 .enqueue(GetCampaignListCallback);
     }
 

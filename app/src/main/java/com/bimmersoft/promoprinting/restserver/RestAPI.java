@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
@@ -119,7 +120,8 @@ public class RestAPI extends Service {
 
                 if (PRINT_MODE == PRNT_ESC_MODE) {
                     /*for ESC Command */
-                    pc.printBitmapTest(getApplicationContext(), str);
+                    //pc.printBitmapTest(getApplicationContext(), str);
+                    pc.printBitmap(getApplicationContext(), str);
                     Log.w("Info","Print ESC Mode.");
                 }else if (PRINT_MODE == PRNT_ZPL_MODE ){
                     /*for ZPL command*/
@@ -132,7 +134,91 @@ public class RestAPI extends Service {
                 response.redirect("/printing?FILE=" + str + "&ICON=" + icon);
             }
         });
+        httpServer.get("/campaignprint", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                //assertNotNull(request.getHeaders().get("Host"));
+                //assert(request.getHeaders().get("Host"));
+                String str =  request.getQuery().getString("CAMPAIGNID");
 
+                PicPrintEx pc = new PicPrintEx();
+
+                if (PRINT_MODE == PRNT_ESC_MODE) {
+                    /*for ESC Command */
+                    //pc.printBitmapTest(getApplicationContext(), str);
+                    pc.printCampaign(getApplicationContext(), str);
+                    Log.w("Info","Print ESC Mode.");
+                }else if (PRINT_MODE == PRNT_ZPL_MODE ){
+                    /*for ZPL command*/
+                    //pc.printBitmapZPl(getApplicationContext(),str);
+                    pc.printCampaignZPl(getApplicationContext(),str);
+                    Log.w("Info","Print ZPL Mode.");
+                }
+
+                //response.send("<HTML><HEAD></HEAD> <BODY><IMG SRC='http://localhost:8080/"+str+"'></IMG></BODY></HTML>");
+                Log.e("Debug","/campaign?CAMPAIGNID=" + str );
+                response.redirect("/campaign?CAMPAIGNID=" + str );
+            }
+        });
+
+        httpServer.get("/campaign", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                String str =  request.getQuery().getString("CAMPAIGNID");
+
+                String html_text = "<!DOCTYPE html>\n" +
+                        "<html>\n" +
+                        "<body>\n" +
+                        "<A HREF=\"/campaignprint?CAMPAIGNID="+ str +"\" >\n" +
+                        "<img src=\"/campaignicon?CAMPAIGNID="+ str +"\" ></img>\n" +
+                        "<!-- <button onclick=\"myFunction()\">Print this page</button> -->\n" +
+                        "</A>\n" +
+                        "<script>\n" +
+                        "\n" +
+                        "function myFunction() {\n" +
+                        "  window.print();\n" +
+                        "}\n" +
+                        "\n" +
+                        "</script>\n" +
+                        "\n" +
+                        "</body>\n" +
+                        "</html>";
+                Log.e("", "Printing....... ");
+                Log.e("Debug","/campaignicon?CAMPAIGNID=" + str);
+                //response.redirect("http://127.0.0.1:8080/print.html");
+                response.send(html_text);
+            }
+        });
+
+        httpServer.get("/campaignicon", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                String str =  request.getQuery().getString("CAMPAIGNID");
+                Log.e("Debug","/campaign?CAMPAIGNID=" + str );
+                String PathFile= Environment.getExternalStorageDirectory()
+                        + File.separator + "bimmersoft.cache" + File.separator + str + "I";
+
+                File fs = new File(PathFile);
+                String mimeType = getMimeType(PathFile);
+                Log.e("Debug", (("File size:" + fs.length())));
+                FileInputStream fileStream = null;
+                try {
+                    fileStream = new FileInputStream(fs);
+                    byte[] bs = new byte[(int) fs.length()];
+                    int read = fileStream.read(bs, 0, bs.length);
+                    response.send(mimeType,bs);
+                    Log.e("Debug", (("Send File completed")));
+                } catch (FileNotFoundException e) {
+                    Log.e("Debug", e.getMessage());
+                }catch (IOException e) {
+                    Log.e("Debug IOException", e.getMessage());
+                }catch (Exception e) {
+                    Log.e("Debug Exception", e.getMessage());
+                }
+
+
+            }
+        });
         httpServer.get("/file", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
@@ -150,7 +236,7 @@ public class RestAPI extends Service {
                     response.send(mimeType,bs);
                     Log.e("Debug", (("Send File completed")));
                 } catch (FileNotFoundException e) {
-                    Log.e("Debug FileNotFoundException", e.getMessage());
+                    Log.e("FileNotFoundException", e.getMessage());
                 }catch (IOException e) {
                     Log.e("Debug IOException", e.getMessage());
                 }catch (Exception e) {
@@ -333,7 +419,7 @@ public class RestAPI extends Service {
         protected Void doInBackground(String... params) {
             // TODO Auto-generated method stub
             PicPrintEx pc = new PicPrintEx();
-            Log.e("ConvertInBackground:doInBackground","param[0]:" + params[0]);
+            Log.e("Convert","param[0]:" + params[0]);
             pc.saveImage("output.png",pc.printBitmaptoBitmap(getApplicationContext(), params[0]));
 
             return null;

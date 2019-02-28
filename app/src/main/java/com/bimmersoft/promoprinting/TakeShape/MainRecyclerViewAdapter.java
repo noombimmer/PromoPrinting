@@ -114,6 +114,7 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
             Log.e("setCampaign-PrintUrl: ",mUrlPrint);
             fWriteImageFromURL(mUrlScreen,campaign.campaignId() + "I");
             fWriteImageFromURL(mUrlPrint,campaign.campaignId() + "P");
+
             postEntryContainer.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                 }

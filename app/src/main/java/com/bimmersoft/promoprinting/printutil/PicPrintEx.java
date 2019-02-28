@@ -147,6 +147,93 @@ public class PicPrintEx {
         //return convertArgbToGrayscale(scaleLogo,ZPL_width,(int)(ZPL_Height));
         return bytes;
     }
+    public void printCampaign(Context ctx,String CampaignID){
+        String PathFile= Environment.getExternalStorageDirectory()
+                + File.separator + "bimmersoft.cache" + File.separator + CampaignID + "P";
+        BufferedInputStream bis;
+        Log.e("printBitmaptoByte","Read : " + PathFile);
+        try {
+            FileInputStream fs = new FileInputStream(PathFile);
+            //FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ;
+        }
+        Bitmap bitmap = BitmapFactory.decodeStream(bis);
+
+        float ratio2 = ((float) bitmap.getWidth()) / ((float)ZPL_width);
+        float ZPL_Height = (bitmap.getHeight() / ratio2) * 1.0f;
+        RestAPI.mZPLHeight = (int)ZPL_Height;
+        RestAPI.mZPLWidth = ZPL_width;
+        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)ZPL_Height,PicScale.ScalingLogic.FIT);
+        Log.e("scaleLogo ",scaleLogo == null?"scaleLogo is null":scaleLogo.toString());
+        Log.e("scaleLogo ","w:" + (scaleLogo == null?"scaleLogo is null":scaleLogo.getWidth()));
+        Log.e("scaleLogo ","h:"+ (scaleLogo == null?"scaleLogo is null":scaleLogo.getHeight()));
+/*
+        byte[] bitmapdata = convertArgbToGrayscale(scaleLogo,scaleLogo.getWidth(),scaleLogo.getHeight());
+        Log.e("bitmapdata ",bitmapdata == null?"bitmapdata is null":bitmapdata.toString());
+        saveImage("output",bitmapdata,scaleLogo.getWidth(),scaleLogo.getHeight());
+        try {
+            FileInputStream fs = new FileInputStream("/storage/emulated/0/output.bmp" );
+            //FileInputStream fs = new FileInputStream( filename);
+            bis = new BufferedInputStream(fs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ;
+        }*/
+        Bitmap tempBmp = toMono(scaleLogo);
+
+
+        Log.e("tempBmp ",tempBmp == null?"tempBmp is null":tempBmp.toString());
+
+        //scaleLogo.set
+
+        PrintPicEx printPic = PrintPicEx.getInstance();
+
+        printPic.init(tempBmp);
+
+        byte[] bytes = printPic.printDrawEx();
+
+        if (null != scaleLogo) {
+            if (scaleLogo.isRecycled()) {
+
+                scaleLogo = null;
+            } else {
+                scaleLogo.recycle();
+                scaleLogo = null;
+            }
+        }
+        if (null != tempBmp) {
+            if (tempBmp.isRecycled()) {
+
+                tempBmp = null;
+            } else {
+                tempBmp.recycle();
+                tempBmp = null;
+            }
+        }
+
+
+        Log.e("BtService", "ESC Width :" + ZPL_width);
+        Log.e("BtService", "ESC Height :" + (int)ZPL_Height);
+
+        ArrayList<byte[]> printBytes = new ArrayList<byte[]>();
+        printBytes.add(GPrinterCommand.reset);
+        printBytes.add(GPrinterCommand.print);
+        printBytes.add(bytes);
+        Log.e("BtService", "ESC COMMAND :" + bytes.toString());
+        Log.e("BtService", "image bytes size is :" + bytes.length);
+        printBytes.add(GPrinterCommand.print);
+
+        PrintQueue.getQueue(ctx).add(printBytes);
+
+//        int size = scaleLogo.getRowBytes() * scaleLogo.getHeight();
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+//        scaleLogo.copyPixelsToBuffer(byteBuffer);
+//        bitmapdata = byteBuffer.array();
+        //return convertArgbToGrayscale(scaleLogo,ZPL_width,(int)(ZPL_Height));
+    }
     public void printBitmap(Context ctx, String filename) {
         BufferedInputStream bis;
         Log.e("printBitmaptoByte","Read : " + filename);
@@ -199,12 +286,12 @@ public class PicPrintEx {
 
         ArrayList<byte[]> printBytes = new ArrayList<byte[]>();
         printBytes.add(GPrinterCommand.reset);
-        printBytes.add(GPrinterCommand.print);
+        //printBytes.add(GPrinterCommand.print);
         printBytes.add(bytes);
         Log.e("BtService", "ESC COMMAND :" + bytes.toString());
         Log.e("BtService", "image bytes size is :" + bytes.length);
         printBytes.add(GPrinterCommand.print);
-
+        printBytes.add(GPrinterCommand.print);
         PrintQueue.getQueue(ctx).add(printBytes);
 
 //        int size = scaleLogo.getRowBytes() * scaleLogo.getHeight();
@@ -256,7 +343,7 @@ public class PicPrintEx {
 
         PrintQueue.getQueue(ctx).add(printBytes);
     }
-    public static int ZPL_width = 385;
+    public static int ZPL_width = 380;
 
     public byte[] printBitmapZPlToFile(Context ctx, String filename) {
         BufferedInputStream bis;
@@ -315,6 +402,73 @@ public class PicPrintEx {
             FileInputStream fs = new FileInputStream("/storage/emulated/0/" + filename);
             bis = new BufferedInputStream(fs);
             Log.e("DEBUGER", "File :" + "/storage/emulated/0/" + filename);
+
+            //compressHex = true;
+
+            //FileInputStream fs = new FileInputStream("/storage/emulated/0/" + "20190130_102137.jpg");
+            //bis = new BufferedInputStream(fs);
+
+            Bitmap myLogo = BitmapFactory.decodeStream(bis);
+            int w =  myLogo.getWidth();
+            int h = myLogo.getHeight();
+
+            int ratio = h/w;
+            float ratio2 = ((float) w) / ((float)ZPL_width);
+
+            Log.e("DEBUGER", "Org-W :" + String.valueOf(w));
+            Log.e("DEBUGER", "Org-H :" + String.valueOf(h));
+            Log.e("DEBUGER", "Org-Ratio :" + String.valueOf(ratio));
+            Log.e("DEBUGER", "Org-FRatio :" + String.format("%.2f",ratio2));
+            Log.e("DEBUGER", "Tgt-w :" + String.valueOf(ZPL_width));
+            Log.e("DEBUGER", "Tgt-h :" + String.format("%.0f",h / ratio2));
+
+            Bitmap scaleLogo = PicScale.createScaledBitmap(myLogo,ZPL_width,(int)(h / ratio2),PicScale.ScalingLogic.FIT);
+
+
+            Log.e("DEBUGER", convertFromImageZPL(scaleLogo, true));
+
+            String CommandH = "\r\n! U1 setvar \"zpl.label_length\" \""+String.valueOf(tgt_height)+"\"\r\n";
+            Log.e("DEBUGER", CommandH);
+
+
+            printBytes.add("\r\n! U1 setvar \"device.languages\" \"zpl\"\r\n".getBytes());
+            printBytes.add(CommandH.getBytes());
+            byte[] bytes = convertFromImageZPL(scaleLogo, true).getBytes();
+            printBytes.add(bytes);
+/*
+            //printBytes.add(convertFromImageZPL(scaleLogo, true).getBytes());
+            byte[] bytes = convertFromImageZPL(scaleLogo, true).getBytes();
+            printBytes.add(bytes);
+            //print(lf.getBytes());
+            printBytes.add("\r\n! U1 setvar \"device.languages\" \"line_print\"\r\n".getBytes());
+            printBytes.add(translator.toNormalRepeatTillEnd('-'));
+
+            //printBytes.add(bytes);
+
+            PrintQueue.getQueue(ctx).add(bytes);
+ */
+            printBytes.add("\r\n! U1 setvar \"device.languages\" \"line_print\"\r\n".getBytes());
+            printBytes.add(translator.toNormalRepeatTillEnd('-'));
+            PrintQueue.getQueue(ctx).add(printBytes);
+        }catch(Exception e){
+            Log.e("Error",e.getMessage());
+        }
+
+
+    }
+
+    public void printCampaignZPl(Context ctx, String CampaignID) {
+        BufferedInputStream bis;
+
+        try {
+            String PathFile= Environment.getExternalStorageDirectory()
+                    + File.separator + "bimmersoft.cache" + File.separator + CampaignID + "P";
+
+            PrinterCommandTranslator translator = new PrinterCommandTranslator();
+            ArrayList<byte[]> printBytes = new ArrayList<byte[]>();
+            FileInputStream fs = new FileInputStream(PathFile);
+            bis = new BufferedInputStream(fs);
+            Log.e("DEBUGER", "File :" + PathFile);
 
             //compressHex = true;
 
