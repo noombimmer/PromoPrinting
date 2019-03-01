@@ -112,9 +112,11 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
             Picasso.with(context).load(mUrlPrint).into(mPrintImg);
             Log.e("setCampaign-screenUrl: ",mUrlScreen);
             Log.e("setCampaign-PrintUrl: ",mUrlPrint);
-            fWriteImageFromURL(mUrlScreen,campaign.campaignId() + "I");
-            fWriteImageFromURL(mUrlPrint,campaign.campaignId() + "P");
 
+//            fWriteImageFromURL(mUrlScreen,campaign.campaignId() + "I");
+//            fWriteImageFromURL(mUrlPrint,campaign.campaignId() + "P");
+            fWriteBitmapToFile(mScreenImg,campaign.campaignId() + "I");
+            fWriteBitmapToFile(mPrintImg,campaign.campaignId() + "P");
             postEntryContainer.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                 }
