@@ -97,26 +97,80 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
         void setCampaign(final GetCampaignListQuery.Item campaign) {
 
+            boolean screen_err = false;
+            boolean print_err = false;
 
 
-            String mUrlScreen = mTakeShapeRoot + Uri.encode(campaign.screenAsset.path(),ALLOWED_URI_CHARS);
-            String mUrlPrint = mTakeShapeRoot + Uri.encode(campaign.printAsset.path(),ALLOWED_URI_CHARS);
+            String mUrlScreen = "";
+            try{
+                mUrlScreen = mTakeShapeRoot + Uri.encode(campaign.screenAsset.path(),ALLOWED_URI_CHARS);
+            }catch(Exception e){
+                screen_err = true;
+                Log.e("setCampaign-screenUrl: ",e.getMessage());
+                Log.e("setCampaign-screenUrl: ",mUrlScreen);
+
+            }
+
+            String mUrlPrint = "";
+           try{
+               mUrlPrint =   mTakeShapeRoot + Uri.encode(campaign.printAsset.path(),ALLOWED_URI_CHARS);
+            }catch(Exception e){
+               print_err = true;
+                Log.e("setCampaign-screenUrl: ",e.getMessage());
+                Log.e("setCampaign-screenUrl: ",mUrlPrint);
+            }
 
             mCampaignID.setText(campaign.campaignId());
-            mStartDate.setText(campaign.startDate());
-            mEndDate.setText(campaign.endDate());
-            mActivated.setText(campaign._enabledAt);
-            mStoreName.setText(campaign.retailer().name);
+            try {
+               mStartDate.setText(campaign.startDate());
+            }catch(Exception e){
+                Log.e("setCampaign-screenUrl: ",e.getMessage());
+                mStoreName.setText("Error Not start date");
 
-            Picasso.with(context).load(mUrlScreen).into(mScreenImg);
-            Picasso.with(context).load(mUrlPrint).into(mPrintImg);
-            Log.e("setCampaign-screenUrl: ",mUrlScreen);
-            Log.e("setCampaign-PrintUrl: ",mUrlPrint);
+            }
+            try {
+                mEndDate.setText(campaign.endDate());
+            }catch(Exception e){
+                Log.e("setCampaign-screenUrl: ",e.getMessage());
+                mStoreName.setText("Error Not end date");
+
+            }
+            try {
+                mActivated.setText(campaign._enabledAt);
+            }catch(Exception e){
+                Log.e("setCampaign-screenUrl: ",e.getMessage());
+                mStoreName.setText("Error Not enable date");
+
+            }
+
+//            try {
+//                mStoreName.setText(campaign.retailer().name);
+//            }catch(Exception e){
+//                Log.e("setCampaign-screenUrl: ",e.getMessage());
+//                mStoreName.setText("Error Not Reteller Name");
+//
+//            }
+
+            if(!screen_err){
+                Picasso.with(context).load(mUrlScreen).into(mScreenImg);
+//                fWriteBitmapToFile(mScreenImg,campaign.campaignId() + "I");
+                //fWriteImageFromURL(mUrlScreen,campaign.campaignId() + "I");
+            }
+            if(!print_err){
+                Picasso.with(context).load(mUrlPrint).into(mPrintImg);
+
+//                fWriteBitmapToFile(mPrintImg,campaign.campaignId() + "P");
+                //fWriteImageFromURL(mUrlPrint,campaign.campaignId() + "P");
+            }
+//            Picasso.with(context).load(mUrlScreen).into(mScreenImg);
+//            Picasso.with(context).load(mUrlPrint).into(mPrintImg);
+//            Log.e("setCampaign-screenUrl: ",mUrlScreen);
+//            Log.e("setCampaign-PrintUrl: ",mUrlPrint);
 
 //            fWriteImageFromURL(mUrlScreen,campaign.campaignId() + "I");
 //            fWriteImageFromURL(mUrlPrint,campaign.campaignId() + "P");
-            fWriteBitmapToFile(mScreenImg,campaign.campaignId() + "I");
-            fWriteBitmapToFile(mPrintImg,campaign.campaignId() + "P");
+//            fWriteBitmapToFile(mScreenImg,campaign.campaignId() + "I");
+//            fWriteBitmapToFile(mPrintImg,campaign.campaignId() + "P");
             postEntryContainer.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                 }
@@ -131,6 +185,11 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         }
         private static void fWriteImageFromURL(String strURL, String filename){
             URL imageurl = null;
+            File file = new File(filename);
+            if(file.exists()){
+                return;
+            }
+
             try {
                 imageurl = new URL(strURL);
                 Bitmap bitmap = BitmapFactory.decodeStream(imageurl.openConnection().getInputStream());

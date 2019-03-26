@@ -112,6 +112,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         }
         Log.e("SVC:","STATUS : " + isMyServiceRunning(mRestAPI.getClass()));
         //runRestFul();
+        strat_svc();
 
     }
 
@@ -230,7 +231,9 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         }else{
             //pc.printBitmapTest(getApplicationContext(),"20190130_102137.jpg");
             //pc.printBitmap(getApplicationContext(),"20190130_102137.jpg");
-            pc.printCampaign(getApplicationContext(),"C000001");
+            //Qr-4.png
+            //pc.printCampaign(getApplicationContext(),"C000002");
+            pc.printCampaign(getApplicationContext(),"C000003");
         }
 
     }

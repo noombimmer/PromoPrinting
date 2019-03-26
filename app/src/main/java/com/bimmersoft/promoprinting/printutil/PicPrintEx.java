@@ -150,6 +150,10 @@ public class PicPrintEx {
     public void printCampaign(Context ctx,String CampaignID){
         String PathFile= Environment.getExternalStorageDirectory()
                 + File.separator + "bimmersoft.cache" + File.separator + CampaignID + "P";
+
+//        String PathFile= Environment.getExternalStorageDirectory()
+//                + File.separator + CampaignID;
+
         BufferedInputStream bis;
         Log.e("printBitmaptoByte","Read : " + PathFile);
         try {
@@ -166,7 +170,10 @@ public class PicPrintEx {
         float ZPL_Height = (bitmap.getHeight() / ratio2) * 1.0f;
         RestAPI.mZPLHeight = (int)ZPL_Height;
         RestAPI.mZPLWidth = ZPL_width;
-        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)ZPL_Height,PicScale.ScalingLogic.FIT);
+        Bitmap scaleLogo = bitmap;
+
+//        Bitmap scaleLogo = PicScale.createScaledBitmap(bitmap,ZPL_width,(int)ZPL_Height,PicScale.ScalingLogic.FIT);
+//
         Log.e("scaleLogo ",scaleLogo == null?"scaleLogo is null":scaleLogo.toString());
         Log.e("scaleLogo ","w:" + (scaleLogo == null?"scaleLogo is null":scaleLogo.getWidth()));
         Log.e("scaleLogo ","h:"+ (scaleLogo == null?"scaleLogo is null":scaleLogo.getHeight()));
@@ -182,16 +189,18 @@ public class PicPrintEx {
             e.printStackTrace();
             return ;
         }*/
-        Bitmap tempBmp = toMono(scaleLogo);
 
-
-        Log.e("tempBmp ",tempBmp == null?"tempBmp is null":tempBmp.toString());
+        //Bitmap tempBmp = toMono(scaleLogo);
+//
+//        Bitmap tempBmp = scaleLogo;
+        //Log.e("tempBmp ",tempBmp == null?"tempBmp is null":tempBmp.toString());
 
         //scaleLogo.set
 
         PrintPicEx printPic = PrintPicEx.getInstance();
 
-        printPic.init(tempBmp);
+        //printPic.init(tempBmp);
+        printPic.init(scaleLogo);
 
         byte[] bytes = printPic.printDrawEx();
 
@@ -204,16 +213,17 @@ public class PicPrintEx {
                 scaleLogo = null;
             }
         }
-        if (null != tempBmp) {
-            if (tempBmp.isRecycled()) {
 
-                tempBmp = null;
-            } else {
-                tempBmp.recycle();
-                tempBmp = null;
-            }
-        }
-
+//        if (null != tempBmp) {
+//            if (tempBmp.isRecycled()) {
+//
+//                tempBmp = null;
+//            } else {
+//                tempBmp.recycle();
+//                tempBmp = null;
+//            }
+//        }
+//
 
         Log.e("BtService", "ESC Width :" + ZPL_width);
         Log.e("BtService", "ESC Height :" + (int)ZPL_Height);
@@ -525,6 +535,7 @@ public class PicPrintEx {
     }
     private int tgt_width = 0;
     private int tgt_height = 0;
+
     public String convertFromImageZPL(Bitmap image, Boolean addHeaderFooter) {
         String hexAscii = createBody(image);
         //if (compressHexZPL) {

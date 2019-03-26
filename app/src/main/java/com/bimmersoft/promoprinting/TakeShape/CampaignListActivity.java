@@ -3,8 +3,13 @@ package com.bimmersoft.promoprinting.TakeShape;
 import android.Manifest;
 import android.app.Application;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.NetworkOnMainThreadException;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -23,6 +29,12 @@ import com.bimmersoft.promoprinting.PromoPrintingApplication;
 import com.bimmersoft.promoprinting.R;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.TimerTask;
 
 import javax.annotation.Nonnull;
@@ -82,9 +94,22 @@ public class CampaignListActivity extends AppCompatActivity {
     }
 
     private ApolloCall.Callback<GetCampaignListQuery.Data> GetCampaignListCallback = new ApolloCall.Callback<GetCampaignListQuery.Data>() {
+        private static final String mTakeShapeRoot = "https://images.takeshape.io/";
+        private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
+        private  File fGetAppPath(){
+            File root = new File(Environment.getExternalStorageDirectory()
+                    + File.separator + "bimmersoft.cache" + File.separator);
+            root.mkdirs();
+            return root;
+        }
+
         @Override
         public void onResponse(@Nonnull final Response<GetCampaignListQuery.Data> dataResponse) {
-            Log.e("", "Campaign Count: " + dataResponse.data().getCampaignList().total);
+
+            Log.e("onResponse", "Campaign Count: " + dataResponse.data().getCampaignList().total);
+            //Log.e("onResponse", "Campaign Count: " + dataResponse.toString());
+            boolean screen_err = false;
+            boolean print_err = false;
 
             CampaignListActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -100,6 +125,31 @@ public class CampaignListActivity extends AppCompatActivity {
                     mProcRun = false;
                 }
             });
+            for (int i = 0; i < dataResponse.data().getCampaignList().total; i++) {
+                Log.e("runOnUiThread", "Campaign ID: " + dataResponse.data().getCampaignList().items().get(i).campaignId);
+                String mUrlScreen = "";
+                try{
+                    mUrlScreen = mTakeShapeRoot + Uri.encode(dataResponse.data().getCampaignList().items().get(i).screenAsset.path(),ALLOWED_URI_CHARS);
+                }catch(Exception e){
+                    screen_err = true;
+                    Log.e("setCampaign-screenUrl: ",e.getMessage());
+                    Log.e("setCampaign-screenUrl: ",mUrlScreen);
+
+                }
+
+                String mUrlPrint = "";
+                try{
+                    mUrlPrint = mUrlPrint =  mTakeShapeRoot + Uri.encode(dataResponse.data().getCampaignList().items().get(i).printAsset.path(),ALLOWED_URI_CHARS);
+                }catch(Exception e){
+                    print_err = true;
+                    Log.e("setCampaign-screenUrl: ",e.getMessage());
+                    Log.e("setCampaign-screenUrl: ",mUrlPrint);
+                }
+
+                fWriteImageFromURL(mUrlPrint,dataResponse.data().getCampaignList().items().get(i).campaignId() + "P");
+                fWriteImageFromURL(mUrlScreen,dataResponse.data().getCampaignList().items().get(i).campaignId() + "I");
+            }
+
 
         }
 
@@ -107,6 +157,71 @@ public class CampaignListActivity extends AppCompatActivity {
         public void onFailure(@Nonnull ApolloException e) {
             Log.e("GetCampaignListCallback", "onFailure Error:" + e.toString());
         }
+        private  void fWriteImageFromURL(String strURL, String filename){
+            URL imageurl = null;
+            File file = new File(filename);
+            if(file.exists()){
+                return;
+            }
+
+            try {
+                imageurl = new URL(strURL);
+                Bitmap bitmap = BitmapFactory.decodeStream(imageurl.openConnection().getInputStream());
+                fWriteBitmapToFile(bitmap,filename);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.e("fWriteImageFromURL :P " ,e.toString());
+            } catch(IOException e){
+                Log.e("fWriteImageFromURL :P " ,"IOException : " + e.toString());
+            } catch (NetworkOnMainThreadException e){
+                Log.e("fWriteImageFromURL :P " , "NetworkOnMainThreadException :" + e.toString());
+            }
+
+        }
+        private  void fWriteBitmapToFile(Bitmap bmp, String filename){
+
+            OutputStream fOut = null;
+            Uri outputFileUri;
+            try {
+                File root = fGetAppPath();
+                File sdImageMainDirectory = new File(root, filename);
+                outputFileUri = Uri.fromFile(sdImageMainDirectory);
+                fOut = new FileOutputStream(sdImageMainDirectory);
+            } catch (Exception e) {
+                Log.e("fWriteBitmapToFile BMP " + filename, "Error occured. Please try again later." + e.toString());
+                //Log.e("fWriteBitmapToFile :P " + filename, "Error occured. Please try again later." + e.getMessage());
+            }
+            try {
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                fOut.flush();
+                fOut.close();
+            } catch (Exception e) {
+                Log.e("fWriteBitmapToFile BMP " ,e.toString());
+            }
+        }
+        private  void fWriteBitmapToFile(ImageView bmp, String filename){
+            bmp.buildDrawingCache();
+            Bitmap bm=bmp.getDrawingCache();
+            OutputStream fOut = null;
+            Uri outputFileUri;
+            try {
+                File root = fGetAppPath();
+                File sdImageMainDirectory = new File(root, filename);
+                outputFileUri = Uri.fromFile(sdImageMainDirectory);
+                fOut = new FileOutputStream(sdImageMainDirectory);
+            } catch (Exception e) {
+                Log.e("fWriteBitmapToFile :P " + filename, "Error occured. Please try again later." + e.toString());
+                //Log.e("fWriteBitmapToFile :P " + filename, "Error occured. Please try again later." + e.getMessage());
+            }
+            try {
+                bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                fOut.flush();
+                fOut.close();
+            } catch (Exception e) {
+
+            }
+        }
+
     };
 
     private void fetchPosts() {

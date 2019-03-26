@@ -33,9 +33,6 @@ query getCampaignList($filter: JSON) {
         path
         sourceUrl
       }
-      retailer {
-        name
-      }
     }
   }
 }
